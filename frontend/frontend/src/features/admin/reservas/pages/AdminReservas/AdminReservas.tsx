@@ -254,13 +254,8 @@ const AdminReservas: React.FC = () => {
                                             <div className="card-state"><span className={`badge ${badgeClass}`}>{r.estado}</span></div>
                                         </div>
                                         <div className="card-actions">
-                                            {/* Solo mostrar botón de aprobar si NO es una reserva en cola */}
-                                            {!(r.estado || '').toLowerCase().includes('cola') && (
-                                                <button className="btn-approve small" disabled={procesandoId === r.reservaID} onClick={() => handleAprobar(r.reservaID)}>
-                                                    <Check className="btn-icon" size={16} />
-                                                    <span>Aprobar</span>
-                                                </button>
-                                            )}
+                                            {/* Las reservas en cola NO deben tener botón Aprobar */}
+                                            {/* Solo mostrar Rechazar y Expirar para reservas en cola */}
                                             <button className="btn-reject small" disabled={procesandoId === r.reservaID} onClick={() => handleRechazar(r.reservaID)}>
                                                 <X className="btn-icon" size={16} />
                                                 <span>Rechazar</span>

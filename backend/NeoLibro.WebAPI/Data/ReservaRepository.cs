@@ -222,7 +222,7 @@ namespace NeoLibroAPI.Data
 
                 var mensajeReserva = reserva.TipoReserva == "ColaEspera"
                     ? $"Tu reserva del libro '{tituloLibro}' ha sido agregada a la cola de espera. Te notificaremos cuando esté disponible."
-                    : $"Tu reserva del libro '{tituloLibro}' ha sido creada. Por favor acércate a la biblioteca para retirarlo.";
+                    : $"Tu reserva del libro '{tituloLibro}' ha sido creada.";
 
                 var tipoNotificacion = reserva.TipoReserva == "ColaEspera" ? "ReservaColaEspera" : "ReservaCreada";
                 
@@ -339,13 +339,20 @@ namespace NeoLibroAPI.Data
 
         public async Task<IEnumerable<AdminReservaDTO>> ListarReservasParaRetiro()
         {
+            // Incluir reservas que están listas para retiro:
+            // - TipoReserva == "Retiro" O Estado == "PorAprobar" O Estado == "Aprobada"
+            // - Excluir estados finales (Cancelada, Completada, Expirada)
+            // - Excluir reservas en cola (Estado == "ColaEspera")
             var query = from r in _context.Reservas
                        join u in _context.Usuarios on r.UsuarioID equals u.UsuarioID
                        join l in _context.Libros on r.LibroID equals l.LibroID
-                       where r.TipoReserva == "Retiro" 
+                       where (r.TipoReserva == "Retiro" 
+                             || r.Estado == NeoLibroAPI.Models.ReservaEstados.PorAprobar
+                             || r.Estado == NeoLibroAPI.Models.ReservaEstados.Aprobada)
                              && r.Estado != NeoLibroAPI.Models.ReservaEstados.Cancelada 
                              && r.Estado != NeoLibroAPI.Models.ReservaEstados.Completada 
                              && r.Estado != NeoLibroAPI.Models.ReservaEstados.Expirada
+                             && r.Estado != NeoLibroAPI.Models.ReservaEstados.ColaEspera
                        orderby r.FechaReserva
                        select new AdminReservaDTO
                        {
@@ -366,11 +373,13 @@ namespace NeoLibroAPI.Data
 
         public async Task<IEnumerable<AdminReservaDTO>> ListarReservasEnEspera()
         {
+            // Solo mostrar reservas que están realmente en cola de espera
+            // Estado debe ser ColaEspera Y TipoReserva debe ser ColaEspera
             var query = from r in _context.Reservas
                        join u in _context.Usuarios on r.UsuarioID equals u.UsuarioID
                        join l in _context.Libros on r.LibroID equals l.LibroID
                        where r.Estado == NeoLibroAPI.Models.ReservaEstados.ColaEspera 
-                             || r.TipoReserva == "ColaEspera"
+                             && r.TipoReserva == "ColaEspera"
                        orderby r.LibroID, r.PrioridadCola ?? int.MaxValue
                        select new AdminReservaDTO
                        {
@@ -590,7 +599,7 @@ namespace NeoLibroAPI.Data
                             cmdNotif.Parameters.AddWithValue("@UsuarioID", usuarioReservaId.Value);
                             cmdNotif.Parameters.AddWithValue("@Tipo", "LibroDisponibleCola");
                             var fechaTexto = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-                            var mensaje = $"¡Buenas noticias! El libro '{tituloLibro ?? "Libro"}' que tenías en cola de espera ya está disponible. Por favor acércate a la biblioteca para retirarlo. Fecha/Hora: {fechaTexto}";
+                            var mensaje = $"¡Buenas noticias! El libro '{tituloLibro ?? "Libro"}' que tenías en cola de espera ya está disponible. Fecha/Hora: {fechaTexto}";
                             cmdNotif.Parameters.AddWithValue("@Mensaje", mensaje);
                             await cmdNotif.ExecuteNonQueryAsync();
                         }
@@ -711,6 +720,24 @@ namespace NeoLibroAPI.Data
 
                     if (usuarioId.HasValue)
                     {
+                        // Si se creó un préstamo (ret > 0), eliminar la notificación genérica que creó el stored procedure
+                        // y crear la notificación detallada con el nombre del ejemplar
+                        if (ret > 0)
+                        {
+                            // Eliminar la notificación genérica del stored procedure
+                            using (var cmdEliminarNotif = new SqlCommand(@"
+                                DELETE FROM Notificaciones 
+                                WHERE ReservaID = @ReservaID 
+                                AND Tipo = 'PrestamoCreado' 
+                                AND Mensaje = 'Se ha creado tu préstamo y el ejemplar está listo para retiro.'", connection))
+                            {
+                                cmdEliminarNotif.Parameters.AddWithValue("@ReservaID", reservaId);
+                                var filasEliminadas = await cmdEliminarNotif.ExecuteNonQueryAsync();
+                                Console.WriteLine($"[AprobarReserva] Notificación genérica eliminada. Filas afectadas: {filasEliminadas}");
+                            }
+                        }
+
+                        // Crear la notificación detallada (la que queremos mantener)
                         var tipo = ret > 0 ? "PrestamoCreado" : "ReservaAprobada";
                         var fechaTexto = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
                         var mensaje = ret > 0
@@ -825,9 +852,10 @@ namespace NeoLibroAPI.Data
 
         private async Task ActualizarPrioridadesCola(int libroId)
         {
+            // Actualizar prioridades solo para reservas que están realmente en cola de espera
             var reservasEnCola = await _context.Reservas
                 .Where(r => r.LibroID == libroId 
-                        && r.Estado == "Activa" 
+                        && r.Estado == NeoLibroAPI.Models.ReservaEstados.ColaEspera 
                         && r.TipoReserva == "ColaEspera")
                 .OrderBy(r => r.FechaReserva)
                 .ToListAsync();

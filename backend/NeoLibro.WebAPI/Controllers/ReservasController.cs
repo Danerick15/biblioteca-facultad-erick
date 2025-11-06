@@ -106,7 +106,7 @@ namespace NeoLibroAPI.Controllers
 
         [HttpGet("en-espera")]
         [Authorize(Roles = "Bibliotecaria,Administrador")]
-        public async Task<ActionResult<IEnumerable<ReservaDTO>>> ReservasEnEspera()
+        public async Task<ActionResult<IEnumerable<AdminReservaDTO>>> ReservasEnEspera()
         {
             var lista = await _reservaBusiness.ListarReservasEnEspera();
             return Ok(lista);

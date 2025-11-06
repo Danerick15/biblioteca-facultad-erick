@@ -437,6 +437,14 @@ namespace NeoLibroAPI.Data
                         cmdActualizarPrestamo.Parameters.AddWithValue("@Observaciones", (object?)observaciones ?? DBNull.Value);
                         cmdActualizarPrestamo.ExecuteNonQuery();
 
+                        // Obtener el LibroID del ejemplar devuelto
+                        int? libroId = null;
+                        var cmdLibro = new SqlCommand("SELECT LibroID FROM Ejemplares WHERE EjemplarID = @EjemplarID", cn, transaction);
+                        cmdLibro.Parameters.AddWithValue("@EjemplarID", ejemplarId.Value);
+                        var libroIdResult = cmdLibro.ExecuteScalar();
+                        if (libroIdResult != null && libroIdResult != DBNull.Value)
+                            libroId = Convert.ToInt32(libroIdResult);
+
                         // Poner ejemplar disponible primero
                         var cmdActualizarEjemplar = new SqlCommand(@"
                             UPDATE Ejemplares 
@@ -449,94 +457,81 @@ namespace NeoLibroAPI.Data
                         Console.WriteLine($"[ProcesarDevolucion] Ejemplar {ejemplarId.Value} actualizado a 'Disponible'. Filas afectadas: {rowsUpdated}");
                         #endif
 
-                        // Llamar al stored procedure que procesa la cola de reservas
-                        var cmdProcesarCola = new SqlCommand("sp_procesar_cola_reservas", cn, transaction);
-                        cmdProcesarCola.CommandType = CommandType.StoredProcedure;
-                        cmdProcesarCola.Parameters.AddWithValue("@EjemplarID", ejemplarId.Value);
-                        
-                        // Obtener el ID de la primera reserva en cola que fue atendida (si existe)
-                        var reservaIdTop = (int?)cmdProcesarCola.ExecuteScalar();
-                        
-                        #if DEBUG
-                        Console.WriteLine($"[ProcesarDevolucion] Stored procedure retornó ReservaID: {reservaIdTop?.ToString() ?? "NULL"}");
-                        #endif
-                        int? usuarioReservaId = null;
-
-                        if (reservaIdTop.HasValue)
+                        // Procesar la cola de reservas para este libro si hay ejemplar disponible
+                        if (libroId.HasValue)
                         {
-                            // Obtener el UsuarioID de la reserva atendida
-                            var cmdUsuarioReserva = new SqlCommand(
-                                "SELECT UsuarioID FROM Reservas WHERE ReservaID = @ReservaID", 
-                                cn, transaction);
-                            cmdUsuarioReserva.Parameters.AddWithValue("@ReservaID", reservaIdTop.Value);
-                            usuarioReservaId = (int?)cmdUsuarioReserva.ExecuteScalar();
-                        }
-
-                        if (reservaIdTop.HasValue && usuarioReservaId.HasValue)
-                        {
-                            #if DEBUG
-                            Console.WriteLine($"[ProcesarDevolucion] Procesando reserva {reservaIdTop.Value} para usuario {usuarioReservaId.Value}");
-                            #endif
+                            // Buscar la primera reserva en cola para este libro
+                            int? primeraReservaId = null;
+                            int? usuarioReservaId = null;
+                            string? tituloLibro = null;
                             
-                            // Obtener título del libro para la reserva atendida
-                            string? tituloLibroReserva = null;
-                            using (var cmdTituloRes = new SqlCommand(@"
-                                SELECT TOP 1 l.Titulo
+                            var cmdReserva = new SqlCommand(@"
+                                SELECT TOP 1 r.ReservaID, r.UsuarioID, ISNULL(l.Titulo, 'Libro') as Titulo
                                 FROM Reservas r
-                                LEFT JOIN Ejemplares e ON r.EjemplarID = e.EjemplarID
-                                LEFT JOIN Libros l ON l.LibroID = ISNULL(e.LibroID, r.LibroID)
-                                WHERE r.ReservaID = @ReservaID", cn, transaction))
+                                LEFT JOIN Libros l ON r.LibroID = l.LibroID
+                                WHERE r.LibroID = @LibroID 
+                                AND r.Estado = 'ColaEspera'
+                                AND r.TipoReserva = 'ColaEspera'
+                                ORDER BY 
+                                    CASE WHEN r.PrioridadCola IS NULL THEN 999999 ELSE r.PrioridadCola END,
+                                    r.FechaReserva", cn, transaction);
+                            cmdReserva.Parameters.AddWithValue("@LibroID", libroId.Value);
+                            
+                            using (var reader = cmdReserva.ExecuteReader())
                             {
-                                cmdTituloRes.Parameters.AddWithValue("@ReservaID", reservaIdTop.Value);
-                                var val = cmdTituloRes.ExecuteScalar();
-                                if (val != null && val != DBNull.Value)
-                                    tituloLibroReserva = Convert.ToString(val);
+                                if (reader.Read())
+                                {
+                                    primeraReservaId = reader.GetInt32("ReservaID");
+                                    usuarioReservaId = reader.GetInt32("UsuarioID");
+                                    tituloLibro = reader.GetString("Titulo");
+                                }
                             }
-                            // Crear préstamo automático para la reserva atendida
-                            // En este esquema insertamos el registro vinculando la ReservaID
-                            var cmdPrestamoAuto = new SqlCommand(@"
-                                INSERT INTO Prestamos (ReservaID, FechaPrestamo, FechaVencimiento, Estado)
-                                VALUES (@ReservaID, GETDATE(), DATEADD(day, 15, GETDATE()), 'Prestado')", cn, transaction);
-                            cmdPrestamoAuto.Parameters.AddWithValue("@ReservaID", reservaIdTop.Value);
-                            cmdPrestamoAuto.ExecuteNonQuery();
 
-                            // Marcar reserva como atendida
-                            var cmdMarcarReserva = new SqlCommand(@"
-                                UPDATE Reservas SET Estado = 'Atendida'
-                                WHERE ReservaID = @ReservaID", cn, transaction);
-                            cmdMarcarReserva.Parameters.AddWithValue("@ReservaID", reservaIdTop.Value);
-                            cmdMarcarReserva.ExecuteNonQuery();
+                            if (primeraReservaId.HasValue && usuarioReservaId.HasValue)
+                            {
+                                // Actualizar la reserva: asignar ejemplar y cambiar a Retiro/PorAprobar
+                                var cmdUpdateReserva = new SqlCommand(@"
+                                    UPDATE Reservas 
+                                    SET EjemplarID = @EjemplarID,
+                                        TipoReserva = 'Retiro',
+                                        Estado = 'PorAprobar',
+                                        FechaLimiteRetiro = DATEADD(day, 2, GETDATE()),
+                                        PrioridadCola = NULL
+                                    WHERE ReservaID = @ReservaID", cn, transaction);
+                                cmdUpdateReserva.Parameters.AddWithValue("@EjemplarID", ejemplarId.Value);
+                                cmdUpdateReserva.Parameters.AddWithValue("@ReservaID", primeraReservaId.Value);
+                                cmdUpdateReserva.ExecuteNonQuery();
 
-                            // Cambiar nuevamente el estado del ejemplar a Prestado
-                            var cmdEjemplarPrestado = new SqlCommand(@"
-                                UPDATE Ejemplares SET Estado = 'Prestado' WHERE EjemplarID = @EjemplarID", cn, transaction);
-                            cmdEjemplarPrestado.Parameters.AddWithValue("@EjemplarID", ejemplarId.Value);
-                            var rowsPrestado = cmdEjemplarPrestado.ExecuteNonQuery();
-                            
-                            #if DEBUG
-                            Console.WriteLine($"[ProcesarDevolucion] Ejemplar {ejemplarId.Value} actualizado a 'Prestado' para reserva. Filas afectadas: {rowsPrestado}");
-                            #endif
+                                // Marcar el ejemplar como Reservado (no Disponible, porque está asignado a la reserva)
+                                var cmdEjemplarReservado = new SqlCommand(@"
+                                    UPDATE Ejemplares 
+                                    SET Estado = 'Reservado'
+                                    WHERE EjemplarID = @EjemplarID", cn, transaction);
+                                cmdEjemplarReservado.Parameters.AddWithValue("@EjemplarID", ejemplarId.Value);
+                                cmdEjemplarReservado.ExecuteNonQuery();
 
-                            // Crear notificación para el usuario cuya reserva fue atendida (libro disponible)
-                            var cmdInsertNotifReserva = new SqlCommand(@"
-                                INSERT INTO Notificaciones (ReservaID, UsuarioID, Tipo, Mensaje, FechaCreacion, Estado)
-                                VALUES (@ReservaID, @UsuarioID, @Tipo, @Mensaje, GETDATE(), 'Pendiente')", cn, transaction);
-                            cmdInsertNotifReserva.Parameters.AddWithValue("@ReservaID", reservaIdTop.Value);
-                            cmdInsertNotifReserva.Parameters.AddWithValue("@UsuarioID", usuarioReservaId.Value);
-                            cmdInsertNotifReserva.Parameters.AddWithValue("@Tipo", "LibroDisponibleCola");
-                            var fechaTextoReserva = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
-                            cmdInsertNotifReserva.Parameters.AddWithValue("@Mensaje", $"¡Buenas noticias! El libro '{tituloLibroReserva ?? "(sin título)"}' que tenías en cola de espera ya está disponible. Por favor acércate a la biblioteca para retirarlo. Fecha/Hora: {fechaTextoReserva}");
-                            cmdInsertNotifReserva.ExecuteNonQuery();
-                            
-                            #if DEBUG
-                            Console.WriteLine($"[ProcesarDevolucion] Notificación de libro disponible creada para usuario {usuarioReservaId.Value}, ReservaID: {reservaIdTop.Value}");
-                            #endif
-                        }
-                        else
-                        {
-                            #if DEBUG
-                            Console.WriteLine($"[ProcesarDevolucion] No hay reservas en cola. Ejemplar {ejemplarId.Value} queda como 'Disponible'");
-                            #endif
+                                // Crear notificación para el estudiante
+                                var cmdNotif = new SqlCommand(@"
+                                    INSERT INTO Notificaciones (ReservaID, UsuarioID, Tipo, Mensaje, FechaCreacion, Estado)
+                                    VALUES (@ReservaID, @UsuarioID, @Tipo, @Mensaje, GETDATE(), 'Pendiente')", cn, transaction);
+                                cmdNotif.Parameters.AddWithValue("@ReservaID", primeraReservaId.Value);
+                                cmdNotif.Parameters.AddWithValue("@UsuarioID", usuarioReservaId.Value);
+                                cmdNotif.Parameters.AddWithValue("@Tipo", "LibroDisponibleCola");
+                                var fechaTexto = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                                var mensaje = $"¡Buenas noticias! El libro '{tituloLibro ?? "Libro"}' que tenías en cola de espera ya está disponible. Fecha/Hora: {fechaTexto}";
+                                cmdNotif.Parameters.AddWithValue("@Mensaje", mensaje);
+                                cmdNotif.ExecuteNonQuery();
+
+                                #if DEBUG
+                                Console.WriteLine($"[ProcesarDevolucion] Reserva {primeraReservaId.Value} procesada. Movida a PorAprobar/Retiro. Notificación creada para usuario {usuarioReservaId.Value}");
+                                #endif
+                            }
+                            else
+                            {
+                                #if DEBUG
+                                Console.WriteLine($"[ProcesarDevolucion] No hay reservas en cola para el libro {libroId.Value}. Ejemplar {ejemplarId.Value} queda como 'Disponible'");
+                                #endif
+                            }
                         }
 
                         // Crear notificación para el usuario que realizó la devolución

@@ -55,9 +55,9 @@ const mapearNotificacion = (notif: NotificacionBackend): Notificacion => {
     // Generar título basado en el tipo
     const titulos: Record<string, string> = {
         'prestamo': 'Préstamo registrado',
-        'devolucion': 'Recordatorio de devolución',
+        'devolucion': 'Devolución realizada',
         'multa': 'Multa generada',
-        'reserva': 'Libro disponible',
+        'reserva': 'Reserva registrada',
         'sistema': 'Notificación del sistema'
     };
 

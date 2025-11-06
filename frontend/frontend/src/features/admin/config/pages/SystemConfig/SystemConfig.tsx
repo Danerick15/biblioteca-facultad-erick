@@ -18,8 +18,7 @@ import {
     Shield,
     BookOpen,
     AlertTriangle,
-    CheckCircle,
-    Globe
+    CheckCircle
 } from 'lucide-react';
 import './SystemConfig.css';
 
@@ -171,8 +170,7 @@ const SystemConfig: React.FC = () => {
         { id: 'multas', nombre: 'Multas', icono: AlertTriangle },
         { id: 'notificaciones', nombre: 'Notificaciones', icono: Bell },
         { id: 'seguridad', nombre: 'Seguridad', icono: Shield },
-        { id: 'respaldo', nombre: 'Respaldo', icono: Database },
-        { id: 'interfaz', nombre: 'Interfaz', icono: Globe }
+        { id: 'respaldo', nombre: 'Respaldo', icono: Database }
     ];
 
     return (
@@ -710,66 +708,6 @@ const SystemConfig: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Sección Interfaz */}
-                            {seccionActiva === 'interfaz' && (
-                                <div className="section-content">
-                                    <div className="section-header">
-                                        <Globe size={24} />
-                                        <h2>Configuración de Interfaz</h2>
-                                    </div>
-                                    
-                                    <div className="form-grid">
-                                        <div className="form-group">
-                                            <label htmlFor="tema">Tema</label>
-                                            <select
-                                                id="tema"
-                                                value={configuracion.interfaz.tema}
-                                                onChange={(e) => manejarCambio('interfaz', 'tema', e.target.value)}
-                                            >
-                                                <option value="claro">Claro</option>
-                                                <option value="oscuro">Oscuro</option>
-                                                <option value="auto">Automático</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label htmlFor="elementosPorPagina">Elementos por Página</label>
-                                            <input
-                                                type="number"
-                                                id="elementosPorPagina"
-                                                value={configuracion.interfaz.elementosPorPagina}
-                                                onChange={(e) => manejarCambio('interfaz', 'elementosPorPagina', parseInt(e.target.value))}
-                                                min="5"
-                                                max="100"
-                                            />
-                                        </div>
-
-                                        <div className="form-group checkbox-group">
-                                            <label className="checkbox-label">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={configuracion.interfaz.mostrarImagenes}
-                                                    onChange={(e) => manejarCambio('interfaz', 'mostrarImagenes', e.target.checked)}
-                                                />
-                                                <span className="checkmark"></span>
-                                                Mostrar Imágenes
-                                            </label>
-                                        </div>
-
-                                        <div className="form-group checkbox-group">
-                                            <label className="checkbox-label">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={configuracion.interfaz.animaciones}
-                                                    onChange={(e) => manejarCambio('interfaz', 'animaciones', e.target.checked)}
-                                                />
-                                                <span className="checkmark"></span>
-                                                Habilitar Animaciones
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
