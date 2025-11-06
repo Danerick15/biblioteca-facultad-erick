@@ -1,0 +1,240 @@
+/* PageLoader.css - Estilos para el loader de páginas con skeleton */
+
+.page-loader {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    padding: 2rem;
+    color: #ffffff;
+}
+
+.page-loader-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+}
+
+.page-loader-message .loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.page-loader-message p {
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.page-loader-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ===== HEADER ===== */
+.page-loader-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* ===== DASHBOARD ===== */
+.page-loader-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.page-loader-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ===== CATALOG ===== */
+.page-loader-search {
+    margin-bottom: 2rem;
+}
+
+.page-loader-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ===== PROFILE ===== */
+.page-loader-profile {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.profile-skeleton-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+}
+
+.profile-skeleton-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ===== LIST ===== */
+.page-loader-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.page-loader-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ===== TABLE ===== */
+.page-loader-table {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-loader-content {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.page-loader-message {
+    animation: fadeInUp 0.4s ease-out 0.1s both;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .page-loader {
+        padding: 1.5rem;
+    }
+
+    .page-loader-stats {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .page-loader-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .page-loader-profile {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-loader {
+        padding: 1rem;
+    }
+
+    .page-loader-content {
+        gap: 1.5rem;
+    }
+
+    .page-loader-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .page-loader-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .page-loader-filters {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .profile-skeleton-left {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-loader-message {
+        padding: 1.5rem;
+    }
+
+    .page-loader-message .loading-spinner {
+        width: 40px;
+        height: 40px;
+    }
+
+    .page-loader-message p {
+        font-size: 1rem;
+    }
+
+    .profile-skeleton-left {
+        padding: 1rem;
+    }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+@media (prefers-reduced-motion: reduce) {
+    .page-loader-message .loading-spinner {
+        animation: none;
+    }
+
+    .page-loader-content,
+    .page-loader-message {
+        animation: none;
+    }
+}
+
+/* ===== MODO OSCURO (si se implementa) ===== */
+@media (prefers-color-scheme: dark) {
+    .page-loader {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+}

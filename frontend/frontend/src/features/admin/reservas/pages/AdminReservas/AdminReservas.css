@@ -1,0 +1,229 @@
+.admin-reservas-page .admin-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.admin-reservas-page .panel {
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.admin-reservas-page h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+}
+
+.count-badge {
+    background: #eef2ff;
+    color: #3730a3;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+/* Estado "PorAprobar": sin fondo, solo borde y color de texto */
+.badge-success { 
+    background: transparent;
+    color: #15803d; /* Verde oscuro para el texto */
+    border: 1.5px solid #22c55e; /* Borde verde para remarcar */
+}
+/* Estado "POR APROBAR": sin fondo, solo borde y color de texto */
+.badge-warning { 
+    background: transparent; 
+    color: #b45309;  /* Color naranja oscuro para contraste */ 
+    border: 1.5px solid #f59e0b; /* Borde naranja para remarcar */
+}
+.badge-danger { background: linear-gradient(90deg,#ef4444,#dc2626); color: white; }
+
+.admin-reservas-page .admin-table tbody tr:hover { background: #fafafa; }
+
+.admin-reservas-page .admin-table td.actions { display:flex; gap:6px; }
+
+/* New card/grid layout */
+.admin-controls { margin: 12px 0 16px; display:flex; justify-content:flex-end; }
+.admin-search { padding:8px 12px; border-radius:8px; border:1px solid #e6e6e6; width:320px }
+
+.cards-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+.card { 
+    background: #fff;
+    border: 1px solid #e9e9ef;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: space-between;
+    min-height: 150px;
+    width: 100%;
+}
+.card-header { display:flex; justify-content:space-between; align-items:center }
+.card-title { font-weight:700; color:#111827 }
+.card-meta { color:#6b7280; font-size:0.875rem }
+.card-body { color:#374151; font-size:0.9rem; display:flex; flex-direction:column; gap:6px }
+
+.loan-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4b5563;
+}
+
+.loan-info svg {
+    color: #6b7280;
+}
+.card-state { margin-top:6px }
+.card-actions { 
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+/* Ensure buttons stay aligned at the bottom of the card */
+.card-body { 
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+.card-actions { 
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.panel-footer { margin-top:12px; display:flex; justify-content:center }
+.pagination { display:flex; gap:8px; align-items:center }
+.pagination-btn { padding:6px 10px; border-radius:6px; border:1px solid #e6e6e6; background:#fff; cursor:pointer }
+.pagination-btn:disabled { opacity:0.5; cursor:not-allowed }
+.pagination-info { color:#6b7280 }
+
+/* Panel titles */
+.panel-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Admin Reserva specific button colors */
+.admin-reservas-page .card-actions .btn-primary.small {
+    background: linear-gradient(90deg, #bbf7d0, #86efac); /* light green */
+    color: #065f46; /* darker green text */
+    border: 1px solid rgba(6,95,70,0.12);
+}
+.admin-reservas-page .card-actions .btn-primary.small:hover {
+    background: linear-gradient(90deg, #86efac, #4ade80);
+}
+.admin-reservas-page .card-actions .btn-danger.small {
+    background: linear-gradient(90deg, #fee2e2, #fecaca); /* light red */
+    color: #7f1d1d; /* darker red text */
+    border: 1px solid rgba(127,29,29,0.08);
+}
+.admin-reservas-page .card-actions .btn-danger.small:hover {
+    background: linear-gradient(90deg, #fecaca, #fca5a5);
+}
+
+/* Styles for the actual button classNames used in the JSX */
+.admin-reservas-page .card-actions .btn-approve.small {
+    background: linear-gradient(90deg, #dcfce7, #bbf7d0); /* Verde más suave */
+    color: #166534; /* Verde oscuro para contraste */
+    border: 1px solid rgba(22,101,52,0.15);
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform .08s ease, box-shadow .12s ease;
+}
+.admin-reservas-page .card-actions .btn-approve.small:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: linear-gradient(90deg, #bbf7d0, #86efac);
+    box-shadow: 0 6px 18px rgba(22,101,52,0.12);
+}
+
+.admin-reservas-page .card-actions .btn-reject.small {
+    background: linear-gradient(90deg, #fee2e2, #fecaca); /* Rojo más suave */
+    color: #991b1b; /* Rojo oscuro para contraste */
+    border: 1px solid rgba(153,27,27,0.15);
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform .08s ease, box-shadow .12s ease;
+}
+.admin-reservas-page .card-actions .btn-reject.small:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: linear-gradient(90deg, #fecaca, #fca5a5);
+    box-shadow: 0 6px 18px rgba(153,27,27,0.12);
+}
+
+.admin-reservas-page .card-actions .btn-secondary.small {
+    background: linear-gradient(90deg,#f3f4f6,#e5e7eb);
+    color: #374151;
+    border: 1px solid rgba(99,102,241,0.06);
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+/* Icon spacing & alignment inside buttons */
+.admin-reservas-page .card-actions button.small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 100px;
+}
+.admin-reservas-page .card-actions .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 2px;
+}
+
+.admin-reservas-page .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-reservas-page .admin-table th,
+.admin-reservas-page .admin-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f2f2f2;
+    text-align: left;
+}
+
+.admin-reservas-page .admin-table th {
+    background: #fafafa;
+    font-weight: 600;
+}
+
+.admin-reservas-page .btn-primary.small,
+.admin-reservas-page .btn-danger.small,
+.admin-reservas-page .btn-secondary.small {
+    margin-right: 8px;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    padding: 24px;
+    color: #666;
+}
+
+.error-message {
+    background: #ffe6e6;
+    color: #800;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin: 12px 0;
+}

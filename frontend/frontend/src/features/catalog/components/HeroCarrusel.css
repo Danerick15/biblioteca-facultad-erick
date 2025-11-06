@@ -1,0 +1,185 @@
+.hero-carrusel {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: #000;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+}
+
+
+.hero-img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.hero-placeholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%);
+    background-size: 400% 100%;
+    animation: shimmer 1.2s infinite;
+    border-radius: 12px;
+}
+
+.hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.hero-img.visible {
+    opacity: 1;
+}
+
+@keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+
+/* Estados de carga y error */
+.hero-loading, .hero-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #fff;
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hero-loading p, .hero-error p {
+    font-size: 1.1rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+
+.hero-overlay {
+    position: absolute;
+    bottom: 50px;
+    left: 60px;
+    color: #fff;
+    max-width: 600px;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.8);
+}
+
+.hero-overlay h2 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem;
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.hero-overlay .autor {
+    font-size: 1.3rem;
+    color: #3182ce;
+    margin-bottom: 0.8rem;
+    animation: fadeInUp 1s ease forwards;
+}
+
+.hero-overlay p {
+    font-size: 1.1rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+    animation: fadeInUp 1.2s ease forwards;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    animation: fadeInUp 1.4s ease forwards;
+}
+
+.btn-read,
+.btn-add,
+.btn-fav {
+    border: none;
+    padding: 0.7rem 1.2rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-read {
+    background: #3182ce;
+    color: #ffffff;
+}
+
+.btn-add {
+    background: #4a5568;
+    color: #ffffff;
+}
+
+.btn-fav {
+    background: #e53e3e;
+    color: #ffffff;
+}
+
+.btn-read:hover { 
+    background: #2c5aa0; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+.btn-add:hover { 
+    background: #2d3748; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
+}
+.btn-fav:hover { 
+    background: #c53030; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+}
+
+.detalles {
+    font-size: 1rem;
+    color: #aaa;
+    animation: fadeInUp 1.6s ease forwards;
+}
+
+
+.flecha-hero {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.6);
+    border: none;
+    color: #fff;
+    font-size: 2.5rem;
+    cursor: pointer;
+    padding: 0.3rem 0.7rem;
+    z-index: 10;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+.flecha-hero:hover { background: rgba(0,0,0,0.9); transform: scale(1.1); }
+.flecha-hero.izquierda { left: 20px; }
+.flecha-hero.derecha { right: 20px; }
+
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}

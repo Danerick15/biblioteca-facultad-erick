@@ -1,0 +1,8 @@
+.cm-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:2000}
+.cm-modal{background:#fff;padding:16px;border-radius:8px;max-width:480px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+.cm-title{margin:0 0 8px 0;font-size:1.1rem}
+.cm-message{margin-bottom:12px;color:#333}
+.cm-actions{display:flex;justify-content:flex-end;gap:8px}
+.cm-btn{padding:8px 12px;border-radius:6px;border:1px solid transparent;cursor:pointer}
+.cm-cancel{background:#f3f4f6;color:#374151;border-color:#e5e7eb}
+.cm-confirm{background:linear-gradient(90deg,#10b981,#059669);color:white}

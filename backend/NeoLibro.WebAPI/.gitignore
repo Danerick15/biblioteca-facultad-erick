@@ -1,0 +1,8 @@
+﻿bin/
+obj/
+*.user
+*.vs
+*.swp
+*.db
+*.mdf
+*.ldf

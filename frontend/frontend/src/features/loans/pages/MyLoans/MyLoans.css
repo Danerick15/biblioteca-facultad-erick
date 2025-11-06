@@ -1,0 +1,336 @@
+/* El fondo ahora se maneja desde el Layout principal */
+.page-content {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    background: transparent; /* Fondo transparente para mostrar el del Layout */
+}
+
+.prestamos-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: white;
+}
+
+.btn-back {
+    background: #3182ce;
+    border: 1px solid #3182ce;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-back:hover {
+    background: #2c5aa0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+.prestamos-header h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.025em;
+}
+
+.prestamos-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    color: white;
+    text-align: center;
+}
+
+.error-message button {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.error-message button:hover {
+    background: #ff5252;
+    transform: translateY(-2px);
+}
+
+.no-prestamos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    color: white;
+    text-align: center;
+}
+
+.no-prestamos h3 {
+    font-size: 2rem;
+    margin: 1rem 0;
+}
+
+.no-prestamos p {
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.prestamos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.prestamo-card {
+    background: rgba(46, 58, 68, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+    border-left: 5px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.prestamo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.prestamo-card.prestado {
+    border-left-color: #10b981;
+}
+
+.prestamo-card.atrasado {
+    border-left-color: #ef4444;
+}
+
+.prestamo-card.devuelto {
+    border-left-color: #3b82f6;
+}
+
+.prestamo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.libro-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 1;
+}
+
+.libro-info svg {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.libro-info h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+}
+
+.libro-info p {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    margin: 0.25rem 0;
+}
+
+.estado-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.estado-badge.prestado {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.estado-badge.atrasado {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.estado-badge.devuelto {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.prestamo-details {
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+}
+
+.detail-item strong {
+    color: #ffffff;
+}
+
+.detail-item svg {
+    color: #94a3b8;
+}
+
+.prestamo-actions {
+    margin-bottom: 1rem;
+}
+
+.atraso-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.atraso-warning svg {
+    color: #fca5a5;
+}
+
+.dias-restantes {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.dias-restantes svg {
+    color: #6ee7b7;
+}
+
+.observaciones {
+    background: rgba(59, 130, 246, 0.1);
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    border-left: 3px solid #3b82f6;
+}
+
+.observaciones strong {
+    color: #ffffff;
+}
+
+.prestamos-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.stat-item {
+    text-align: center;
+    color: white;
+}
+
+.stat-item h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.stat-item span {
+    font-size: 2rem;
+    font-weight: 700;
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .mis-prestamos-container {
+        padding: 1rem;
+    }
+    
+    .prestamos-header h1 {
+        font-size: 2rem;
+    }
+    
+    .prestamos-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .prestamo-card {
+        padding: 1rem;
+    }
+    
+    .prestamos-stats {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 1rem;
+    }
+}

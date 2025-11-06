@@ -1,0 +1,15 @@
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\bin\Debug\net9.0\http_test.exe
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\bin\Debug\net9.0\http_test.deps.json
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\bin\Debug\net9.0\http_test.runtimeconfig.json
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\bin\Debug\net9.0\http_test.dll
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\bin\Debug\net9.0\http_test.pdb
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\http_test.GeneratedMSBuildEditorConfig.editorconfig
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\http_test.AssemblyInfoInputs.cache
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\http_test.AssemblyInfo.cs
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\http_test.csproj.CoreCompileInputs.cache
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\http_test.sourcelink.json
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\http_test.dll
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\refint\http_test.dll
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\http_test.pdb
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\http_test.genruntimeconfig.cache
+D:\2025-2\DSW\biblioteca-facultad\backend\tools\http_test\obj\Debug\net9.0\ref\http_test.dll

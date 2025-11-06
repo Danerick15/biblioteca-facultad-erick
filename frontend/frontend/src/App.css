@@ -1,0 +1,163 @@
+/* ===== ESTILOS PARA ACCESO DENEGADO Y LOADING ===== */
+
+/* ===== ESTILOS DE LOADING ===== */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Evitar desbordamiento horizontal global */
+}
+
+/* ===== ESTILOS GLOBALES PARA EVITAR DESBORDAMIENTO ===== */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+/* Asegurar que todos los contenedores principales no desborden */
+.page-content,
+.dashboard-page,
+.catalogo-page,
+.perfil-page,
+.mis-prestamos-container,
+.notificaciones-page,
+.multas-page,
+.admin-libros-container,
+.admin-ejemplares-container,
+.admin-autores-page,
+.admin-categorias-page {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    gap: var(--spacing-lg);
+}
+
+.loading-container--full {
+    min-height: 100vh;
+    background: var(--bg-primary);
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-spinner--sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+
+.loading-spinner--lg {
+    width: 3rem;
+    height: 3rem;
+    border-width: 4px;
+}
+
+.loading-text {
+    color: var(--color-gray-200);
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    text-align: center;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== BOTÓN DE REGRESO ===== */
+.btn-back {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.btn-back:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ===== ESTILOS PARA PANTALLA DE ACCESO DENEGADO ===== */
+
+.access-denied-container {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-family-primary);
+    padding: var(--spacing-xl);
+}
+
+.access-denied-content {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-2xl);
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-2xl);
+}
+
+.access-denied-content h1 {
+    color: var(--color-danger-light);
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--spacing-lg);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.access-denied-content p {
+    color: var(--color-gray-200);
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--spacing-md);
+}
+
+.access-denied-content p strong {
+    color: var(--color-warning-light);
+    font-weight: var(--font-semibold);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .access-denied-content {
+        padding: var(--spacing-xl);
+        margin: var(--spacing-md);
+    }
+    
+    .access-denied-content h1 {
+        font-size: var(--text-3xl);
+    }
+    
+    .access-denied-content p {
+        font-size: var(--text-base);
+    }
+}

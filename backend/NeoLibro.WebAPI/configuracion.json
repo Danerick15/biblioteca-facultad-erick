@@ -1,0 +1,51 @@
+{
+  "general": {
+    "nombreBiblioteca": "Biblioteca FISI - Universidad Nacional de Ingeniería",
+    "direccion": "Av. Túpac Amaru 210, Rímac, Lima",
+    "telefono": "+51 1 481 1070",
+    "email": "biblioteca@fisi.edu.pe",
+    "sitioWeb": "https://www.fisi.edu.pe/biblioteca",
+    "moneda": "PEN",
+    "idioma": "en",
+    "zonaHoraria": "America/Lima"
+  },
+  "prestamos": {
+    "diasPrestamoEstudiante": 1,
+    "diasPrestamoProfesor": 4,
+    "maxPrestamosEstudiante": 2,
+    "maxPrestamosProfesor": 5,
+    "maxRenovaciones": 3,
+    "diasGracia": 2
+  },
+  "multas": {
+    "montoMultaPorDia": 1,
+    "multaMaxima": 50,
+    "descuentoMulta": 50,
+    "diasDescuento": 3
+  },
+  "notificaciones": {
+    "notificacionesEmail": true,
+    "notificacionesSMS": false,
+    "recordatorioVencimiento": 2,
+    "recordatorioMulta": 2
+  },
+  "seguridad": {
+    "sesionTimeout": 30,
+    "intentosLogin": 3,
+    "passwordMinLength": 6,
+    "requiereMayuscula": false,
+    "requiereNumero": false,
+    "requiereSimbolo": false
+  },
+  "respaldo": {
+    "backupAutomatico": true,
+    "frecuenciaBackup": "diario",
+    "diasRetencion": 30
+  },
+  "interfaz": {
+    "tema": "oscuro",
+    "elementosPorPagina": 20,
+    "mostrarImagenes": false,
+    "animaciones": true
+  }
+}
