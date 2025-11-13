@@ -10,6 +10,7 @@ import {
     obtenerEstadisticasPorRol,
     obtenerActividadDiaria,
     obtenerRendimientoBiblioteca,
+    exportarReporte as exportarReporteAPI,
     type EstadisticasGenerales,
     type PrestamoPorMes,
     type LibroMasPrestado,
@@ -18,6 +19,7 @@ import {
     type ActividadDiaria,
     type RendimientoBiblioteca
 } from '../../../../../api/reportes';
+import { obtenerConfiguracion } from '../../../../../api/configuracion';
 import { 
     BarChart3, 
     Users, 
@@ -58,6 +60,12 @@ const Reports: React.FC = () => {
     const [datos, setDatos] = useState<ReporteData | null>(null);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [configuracionReportes, setConfiguracionReportes] = useState<{
+        periodoPorDefecto: number;
+        topNLibros: number;
+        topNUsuarios: number;
+        añoPorDefecto: number;
+    } | null>(null);
     const [filtros, setFiltros] = useState<FiltrosReporte>({
         fechaInicio: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
         fechaFin: new Date().toISOString().split('T')[0],
@@ -66,15 +74,48 @@ const Reports: React.FC = () => {
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
     useEffect(() => {
-        cargarDatos();
+        cargarConfiguracionYReportes();
     }, [filtros]);
 
-    const cargarDatos = async () => {
+    const cargarConfiguracionYReportes = async () => {
+        try {
+            // Cargar configuración primero
+            const configuracion = await obtenerConfiguracion();
+            setConfiguracionReportes(configuracion.reportes);
+            
+            // Luego cargar reportes con los valores de configuración
+            await cargarDatos(configuracion.reportes);
+        } catch (err) {
+            console.error('Error al cargar configuración:', err);
+            // Si falla la configuración, usar valores por defecto
+            const valoresPorDefecto = {
+                periodoPorDefecto: 6,
+                topNLibros: 10,
+                topNUsuarios: 10,
+                añoPorDefecto: new Date().getFullYear()
+            };
+            setConfiguracionReportes(valoresPorDefecto);
+            await cargarDatos(valoresPorDefecto);
+        }
+    };
+
+    const cargarDatos = async (config?: {
+        periodoPorDefecto: number;
+        topNLibros: number;
+        topNUsuarios: number;
+        añoPorDefecto: number;
+    }) => {
         try {
             setCargando(true);
             setError(null);
             
-            // Cargar datos reales desde las APIs
+            // Usar valores de configuración o valores por defecto
+            const periodo = config?.periodoPorDefecto ?? 6;
+            const topLibros = config?.topNLibros ?? 10;
+            const topUsuarios = config?.topNUsuarios ?? 10;
+            const año = config?.añoPorDefecto ?? new Date().getFullYear();
+            
+            // Cargar datos reales desde las APIs usando valores de configuración
             const [
                 estadisticasGenerales,
                 prestamosPorMes,
@@ -85,12 +126,12 @@ const Reports: React.FC = () => {
                 rendimientoBiblioteca
             ] = await Promise.all([
                 obtenerEstadisticasGenerales(),
-                obtenerPrestamosPorMes(new Date().getFullYear()),
-                obtenerLibrosMasPrestados(5),
-                obtenerUsuariosMasActivos(5),
+                obtenerPrestamosPorMes(año),
+                obtenerLibrosMasPrestados(topLibros),
+                obtenerUsuariosMasActivos(topUsuarios),
                 obtenerEstadisticasPorRol(),
                 obtenerActividadDiaria(),
-                obtenerRendimientoBiblioteca(6)
+                obtenerRendimientoBiblioteca(periodo)
             ]);
             
             const datosReales: ReporteData = {
@@ -113,10 +154,38 @@ const Reports: React.FC = () => {
         }
     };
 
-    const exportarReporte = (formato: 'pdf' | 'excel') => {
-        // Simular exportación
-        console.log(`Exportando reporte en formato ${formato}`);
-        alert(`Reporte exportado en formato ${formato.toUpperCase()}`);
+    const exportarReporte = async (formato: 'pdf' | 'excel') => {
+        try {
+            setCargando(true);
+            console.log(`Exportando reporte en formato ${formato}...`);
+            
+            // Usar la función de la API que ya está configurada
+            const blob = await exportarReporteAPI(formato, 'general');
+            
+            // Crear URL temporal y descargar
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            
+            // Determinar extensión y nombre del archivo
+            const extension = formato === 'pdf' ? 'pdf' : 'xlsx';
+            const nombreArchivo = `Reporte_Biblioteca_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.${extension}`;
+            
+            link.download = nombreArchivo;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Limpiar
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            console.log(`Reporte exportado exitosamente: ${nombreArchivo}`);
+        } catch (error) {
+            console.error('Error al exportar reporte:', error);
+            alert(`Error al exportar el reporte: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+        } finally {
+            setCargando(false);
+        }
     };
 
     const formatearMoneda = (monto: number) => {

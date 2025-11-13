@@ -1,0 +1,117 @@
+{
+  "fecha_generacion": "2025-11-12T20:12:24.872983",
+  "estadisticas_generales": {
+    "total_usuarios": 12,
+    "total_libros": 1326,
+    "total_ejemplares": 3373,
+    "prestamos_activos": 20,
+    "prestamos_vencidos": 1,
+    "multas_pendientes": 2,
+    "monto_total_multas": 20.5
+  },
+  "prestamos_por_mes": {
+    "Ene": 0,
+    "Feb": 0,
+    "Mar": 0,
+    "Abr": 0,
+    "May": 0,
+    "Jun": 0,
+    "Jul": 0,
+    "Ago": 0,
+    "Sep": 0,
+    "Oct": 2,
+    "Nov": 18,
+    "Dic": 0
+  },
+  "libros_mas_prestados": [
+    {
+      "titulo": "Tratado de PSICOLOGIA REVOLUCIONARIA",
+      "prestamos": 12
+    },
+    {
+      "titulo": "LOGICA MATEMATICA  un enfoque axiomatico",
+      "prestamos": 3
+    },
+    {
+      "titulo": "LOS RUMBOS DE LA MENTE  ensayos sobre el yo, lo mental natural y la inteligencia artificial",
+      "prestamos": 2
+    },
+    {
+      "titulo": "Introduccion al Pensamiento Sistematico",
+      "prestamos": 2
+    },
+    {
+      "titulo": "The Black Art OF MULTIPLATFORM Game Programming",
+      "prestamos": 1
+    }
+  ],
+  "usuarios_mas_activos": [
+    {
+      "nombre": "María López Silva",
+      "prestamos": 3
+    },
+    {
+      "nombre": "Carlos Ramírez Torres",
+      "prestamos": 3
+    },
+    {
+      "nombre": "Ana Martínez Díaz",
+      "prestamos": 3
+    },
+    {
+      "nombre": "Luis González Vega",
+      "prestamos": 3
+    },
+    {
+      "nombre": "Sofía Herrera Ruiz",
+      "prestamos": 2
+    },
+    {
+      "nombre": "Diego Morales Castro",
+      "prestamos": 2
+    },
+    {
+      "nombre": "Laura Sánchez Jiménez",
+      "prestamos": 2
+    },
+    {
+      "nombre": "Juan Pérez García",
+      "prestamos": 2
+    }
+  ],
+  "estadisticas_por_rol": [
+    {
+      "rol": "Estudiante",
+      "cantidad": 8
+    },
+    {
+      "rol": "Profesor",
+      "cantidad": 3
+    },
+    {
+      "rol": "Administrador",
+      "cantidad": 1
+    }
+  ],
+  "actividad_diaria": {
+    "fecha": "2025-11-12",
+    "prestamos_hoy": 1,
+    "devoluciones_hoy": 0,
+    "multas_generadas_hoy": 0,
+    "multas_pagadas_hoy": 0
+  },
+  "rendimiento_biblioteca": {
+    "periodo": "6 meses",
+    "fecha_inicio": "2025-05-16",
+    "fecha_fin": "2025-11-12",
+    "total_prestamos": 20,
+    "prestamos_completados": 1,
+    "prestamos_vencidos": 1,
+    "tasa_devolucion": 5.0,
+    "total_multas": 1,
+    "monto_total_multas": 10.0,
+    "multas_pagadas": 1,
+    "tasa_pago_multas": 100.0
+  }
+}
+

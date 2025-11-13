@@ -92,7 +92,11 @@ const QuickActions: React.FC = () => {
     // Determinar qué acciones mostrar según el rol
     const getActions = (): QuickAction[] => {
         if (esAdmin()) {
-            return [...baseActions, ...adminActions];
+            // Para administradores, excluir "Mis Préstamos" y "Mis Reservas"
+            const baseActionsFiltradas = baseActions.filter(
+                action => action.id !== 'prestamos' && action.id !== 'reservas'
+            );
+            return [...baseActionsFiltradas, ...adminActions];
         }
         return baseActions;
     };

@@ -11,6 +11,10 @@ PRINT 'TABLAS EN LA BASE DE DATOS BibliotecaFISI';
 PRINT '========================================';
 PRINT '';
 
+-- Eliminar tabla temporal si ya existe (de una ejecución anterior)
+IF OBJECT_ID('tempdb..#TablasInfo') IS NOT NULL
+    DROP TABLE #TablasInfo;
+
 -- Obtener todas las tablas del esquema dbo
 SELECT 
     t.name AS NombreTabla,

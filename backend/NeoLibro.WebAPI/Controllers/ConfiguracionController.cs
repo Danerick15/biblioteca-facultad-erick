@@ -257,6 +257,15 @@ namespace NeoLibroAPI.Controllers
                     elementosPorPagina = 20,
                     mostrarImagenes = true,
                     animaciones = true
+                },
+
+                // Configuración de reportes
+                reportes = new
+                {
+                    periodoPorDefecto = 6, // Meses para el período por defecto
+                    topNLibros = 10, // Cantidad de libros en el ranking
+                    topNUsuarios = 10, // Cantidad de usuarios en el ranking
+                    añoPorDefecto = DateTime.Now.Year // Año por defecto para reportes mensuales
                 }
             };
         }
@@ -322,6 +331,22 @@ namespace NeoLibroAPI.Controllers
 
                     if (seguridad.TryGetProperty("passwordMinLength", out var passLen) && passLen.GetInt32() < 6)
                         errores.Add("La longitud mínima de contraseña debe ser al menos 6 caracteres");
+                }
+
+                // Validar configuración de reportes
+                if (config.TryGetProperty("reportes", out var reportes))
+                {
+                    if (reportes.TryGetProperty("periodoPorDefecto", out var periodo) && (periodo.GetInt32() < 1 || periodo.GetInt32() > 24))
+                        errores.Add("El período por defecto debe estar entre 1 y 24 meses");
+
+                    if (reportes.TryGetProperty("topNLibros", out var topLibros) && (topLibros.GetInt32() < 5 || topLibros.GetInt32() > 50))
+                        errores.Add("El top N de libros debe estar entre 5 y 50");
+
+                    if (reportes.TryGetProperty("topNUsuarios", out var topUsuarios) && (topUsuarios.GetInt32() < 5 || topUsuarios.GetInt32() > 50))
+                        errores.Add("El top N de usuarios debe estar entre 5 y 50");
+
+                    if (reportes.TryGetProperty("añoPorDefecto", out var año) && (año.GetInt32() < 2020 || año.GetInt32() > DateTime.Now.Year + 1))
+                        errores.Add($"El año por defecto debe estar entre 2020 y {DateTime.Now.Year + 1}");
                 }
             }
             catch (Exception ex)

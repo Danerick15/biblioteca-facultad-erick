@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5180/api';
+// axios.defaults.baseURL ya está configurado en auth.ts como '/api'
+// Por lo tanto, solo usamos rutas relativas sin el prefijo /api
 
 // Interfaces para los tipos de datos
 export interface EstadisticasGenerales {
@@ -59,55 +60,64 @@ export interface RendimientoBiblioteca {
 
 // Funciones de la API
 export const obtenerEstadisticasGenerales = async (): Promise<EstadisticasGenerales> => {
-    const response = await axios.get(`${API_BASE_URL}/Reportes/estadisticas-generales`);
+    const response = await axios.get('/Reportes/estadisticas-generales');
     return response.data;
 };
 
 export const obtenerPrestamosPorMes = async (año?: number): Promise<PrestamoPorMes[]> => {
     const params = año ? { año } : {};
-    const response = await axios.get(`${API_BASE_URL}/Reportes/prestamos-por-mes`, { params });
+    const response = await axios.get('/Reportes/prestamos-por-mes', { params });
     return response.data;
 };
 
 export const obtenerLibrosMasPrestados = async (limite: number = 10): Promise<LibroMasPrestado[]> => {
-    const response = await axios.get(`${API_BASE_URL}/Reportes/libros-mas-prestados`, {
+    const response = await axios.get('/Reportes/libros-mas-prestados', {
         params: { limite }
     });
     return response.data;
 };
 
 export const obtenerUsuariosMasActivos = async (limite: number = 10): Promise<UsuarioMasActivo[]> => {
-    const response = await axios.get(`${API_BASE_URL}/Reportes/usuarios-mas-activos`, {
+    const response = await axios.get('/Reportes/usuarios-mas-activos', {
         params: { limite }
     });
     return response.data;
 };
 
 export const obtenerEstadisticasPorRol = async (): Promise<EstadisticaPorRol[]> => {
-    const response = await axios.get(`${API_BASE_URL}/Reportes/estadisticas-por-rol`);
+    const response = await axios.get('/Reportes/estadisticas-por-rol');
     return response.data;
 };
 
 export const obtenerActividadDiaria = async (fecha?: Date): Promise<ActividadDiaria> => {
     const params = fecha ? { fecha: fecha.toISOString().split('T')[0] } : {};
-    const response = await axios.get(`${API_BASE_URL}/Reportes/actividad-diaria`, { params });
+    const response = await axios.get('/Reportes/actividad-diaria', { params });
     return response.data;
 };
 
 export const obtenerRendimientoBiblioteca = async (meses: number = 6): Promise<RendimientoBiblioteca> => {
-    const response = await axios.get(`${API_BASE_URL}/Reportes/rendimiento-biblioteca`, {
+    const response = await axios.get('/Reportes/rendimiento-biblioteca', {
         params: { meses }
     });
     return response.data;
 };
 
-// Función para exportar reportes (simulada)
-export const exportarReporte = async (formato: 'pdf' | 'excel', tipoReporte: string): Promise<Blob> => {
-    // En un sistema real, esto haría una llamada al backend para generar el archivo
-    // Por ahora, simulamos la respuesta
-    const response = await axios.get(`${API_BASE_URL}/Reportes/exportar`, {
-        params: { formato, tipoReporte },
-        responseType: 'blob'
-    });
-    return response.data;
+// Función para exportar reportes
+export const exportarReporte = async (formato: 'pdf' | 'excel', tipoReporte: string = 'general'): Promise<Blob> => {
+    try {
+        const url = '/Reportes/exportar';
+        console.log('Exportando reporte:', { formato, tipoReporte, url });
+        const response = await axios.get(url, {
+            params: { formato, tipoReporte },
+            responseType: 'blob'
+        });
+        console.log('Respuesta recibida:', response.status, response.headers);
+        return response.data;
+    } catch (error: any) {
+        console.error('Error en exportarReporte:', error);
+        console.error('URL intentada:', error.config?.url);
+        console.error('Status:', error.response?.status);
+        console.error('Status text:', error.response?.statusText);
+        throw error;
+    }
 };

@@ -18,7 +18,8 @@ import {
     Shield,
     BookOpen,
     AlertTriangle,
-    CheckCircle
+    CheckCircle,
+    BarChart3
 } from 'lucide-react';
 import './SystemConfig.css';
 
@@ -51,6 +52,17 @@ const SystemConfig: React.FC = () => {
             
             // Cargar configuración real desde la API
             const configuracionReal = await obtenerConfiguracion();
+            
+            // Asegurar que la sección de reportes existe (para compatibilidad con configuraciones antiguas)
+            if (!configuracionReal.reportes) {
+                configuracionReal.reportes = {
+                    periodoPorDefecto: 6,
+                    topNLibros: 10,
+                    topNUsuarios: 10,
+                    añoPorDefecto: new Date().getFullYear()
+                };
+            }
+            
             setConfiguracion(configuracionReal);
         } catch (err: unknown) {
             const error = err as { response?: { data?: { mensaje?: string } } };
@@ -164,13 +176,24 @@ const SystemConfig: React.FC = () => {
         );
     }
 
+    // Asegurar que la sección de reportes existe antes de renderizar
+    if (!configuracion.reportes) {
+        configuracion.reportes = {
+            periodoPorDefecto: 6,
+            topNLibros: 10,
+            topNUsuarios: 10,
+            añoPorDefecto: new Date().getFullYear()
+        };
+    }
+
     const secciones = [
         { id: 'general', nombre: 'General', icono: Settings },
         { id: 'prestamos', nombre: 'Préstamos', icono: BookOpen },
         { id: 'multas', nombre: 'Multas', icono: AlertTriangle },
         { id: 'notificaciones', nombre: 'Notificaciones', icono: Bell },
         { id: 'seguridad', nombre: 'Seguridad', icono: Shield },
-        { id: 'respaldo', nombre: 'Respaldo', icono: Database }
+        { id: 'respaldo', nombre: 'Respaldo', icono: Database },
+        { id: 'reportes', nombre: 'Reportes', icono: BarChart3 }
     ];
 
     return (
@@ -703,6 +726,70 @@ const SystemConfig: React.FC = () => {
                                                 min="7"
                                                 max="365"
                                             />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Sección Reportes */}
+                            {seccionActiva === 'reportes' && (
+                                <div className="section-content">
+                                    <div className="section-header">
+                                        <BarChart3 size={24} />
+                                        <h2>Configuración de Reportes</h2>
+                                    </div>
+                                    
+                                    <div className="form-grid">
+                                        <div className="form-group">
+                                            <label htmlFor="periodoPorDefecto">Período por Defecto (meses)</label>
+                                            <input
+                                                type="number"
+                                                id="periodoPorDefecto"
+                                                value={configuracion.reportes.periodoPorDefecto}
+                                                onChange={(e) => manejarCambio('reportes', 'periodoPorDefecto', parseInt(e.target.value))}
+                                                min="1"
+                                                max="24"
+                                            />
+                                            <span className="input-hint">Período de tiempo por defecto para reportes de rendimiento (1-24 meses)</span>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label htmlFor="topNLibros">Top N Libros</label>
+                                            <input
+                                                type="number"
+                                                id="topNLibros"
+                                                value={configuracion.reportes.topNLibros}
+                                                onChange={(e) => manejarCambio('reportes', 'topNLibros', parseInt(e.target.value))}
+                                                min="5"
+                                                max="50"
+                                            />
+                                            <span className="input-hint">Cantidad de libros a mostrar en el ranking de más prestados (5-50)</span>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label htmlFor="topNUsuarios">Top N Usuarios</label>
+                                            <input
+                                                type="number"
+                                                id="topNUsuarios"
+                                                value={configuracion.reportes.topNUsuarios}
+                                                onChange={(e) => manejarCambio('reportes', 'topNUsuarios', parseInt(e.target.value))}
+                                                min="5"
+                                                max="50"
+                                            />
+                                            <span className="input-hint">Cantidad de usuarios a mostrar en el ranking de más activos (5-50)</span>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label htmlFor="añoPorDefecto">Año por Defecto</label>
+                                            <input
+                                                type="number"
+                                                id="añoPorDefecto"
+                                                value={configuracion.reportes.añoPorDefecto}
+                                                onChange={(e) => manejarCambio('reportes', 'añoPorDefecto', parseInt(e.target.value))}
+                                                min="2020"
+                                                max={new Date().getFullYear() + 1}
+                                            />
+                                            <span className="input-hint">Año por defecto para reportes mensuales de préstamos</span>
                                         </div>
                                     </div>
                                 </div>

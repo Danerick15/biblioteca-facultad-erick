@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5180/api';
+// axios.defaults.baseURL ya está configurado en auth.ts como '/api'
+// Por lo tanto, solo usamos rutas relativas sin el prefijo /api
 
 // Interfaces para la configuración
 export interface ConfiguracionGeneral {
@@ -59,6 +60,13 @@ export interface ConfiguracionInterfaz {
     animaciones: boolean;
 }
 
+export interface ConfiguracionReportes {
+    periodoPorDefecto: number; // Meses para el período por defecto
+    topNLibros: number; // Cantidad de libros en el ranking
+    topNUsuarios: number; // Cantidad de usuarios en el ranking
+    añoPorDefecto: number; // Año por defecto para reportes mensuales
+}
+
 export interface ConfiguracionCompleta {
     general: ConfiguracionGeneral;
     prestamos: ConfiguracionPrestamos;
@@ -67,6 +75,7 @@ export interface ConfiguracionCompleta {
     seguridad: ConfiguracionSeguridad;
     respaldo: ConfiguracionRespaldo;
     interfaz: ConfiguracionInterfaz;
+    reportes: ConfiguracionReportes;
 }
 
 export interface ValidacionConfiguracion {
@@ -76,23 +85,23 @@ export interface ValidacionConfiguracion {
 
 // Funciones de la API
 export const obtenerConfiguracion = async (): Promise<ConfiguracionCompleta> => {
-    const response = await axios.get(`${API_BASE_URL}/Configuracion`);
+    const response = await axios.get('/Configuracion');
     return response.data;
 };
 
 export const actualizarConfiguracion = async (configuracion: ConfiguracionCompleta): Promise<void> => {
-    await axios.put(`${API_BASE_URL}/Configuracion`, configuracion);
+    await axios.put('/Configuracion', configuracion);
 };
 
 export const resetearConfiguracion = async (): Promise<void> => {
-    await axios.post(`${API_BASE_URL}/Configuracion/resetear`);
+    await axios.post('/Configuracion/resetear');
 };
 
 export const validarConfiguracion = async (configuracion: ConfiguracionCompleta): Promise<ValidacionConfiguracion> => {
     try {
         // El endpoint devuelve 200 con { mensaje: 'Configuración válida' }
         // y 400 con { mensaje: 'Configuración inválida', errores: [...] }
-        await axios.post(`${API_BASE_URL}/Configuracion/validar`, configuracion);
+        await axios.post('/Configuracion/validar', configuracion);
         return { esValida: true, errores: [] };
     } catch (err: unknown) {
         const error = err as { response?: { status?: number; data?: any } };
