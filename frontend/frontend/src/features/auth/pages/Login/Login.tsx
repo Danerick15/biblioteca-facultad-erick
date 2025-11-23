@@ -1,5 +1,6 @@
 // src/features/auth/pages/Login/Login.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from 'react-dom';
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import "./Login.css";
@@ -38,6 +39,113 @@ const Login: React.FC = () => {
         setEmail(value);
     };
 
+<<<<<<< Updated upstream
+=======
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const [videoStatus, setVideoStatus] = useState<'loading'|'loaded'|'error'|'idle'>('idle');
+
+    useEffect(() => {
+        if (!videoRef.current) return;
+        const v = videoRef.current;
+        const onLoaded = () => setVideoStatus('loaded');
+        const onError = () => setVideoStatus('error');
+        const onPlaying = () => setVideoStatus('loaded');
+        setVideoStatus('loading');
+        v.addEventListener('loadeddata', onLoaded);
+        v.addEventListener('error', onError);
+        v.addEventListener('playing', onPlaying);
+        // try to play (some browsers require user gesture, but muted should allow autoplay)
+        const tryPlay = async () => {
+            try { await v.play(); } catch (e) { /* ignore */ }
+        };
+        tryPlay();
+        return () => {
+            v.removeEventListener('loadeddata', onLoaded);
+            v.removeEventListener('error', onError);
+            v.removeEventListener('playing', onPlaying);
+        };
+    }, [videoRef.current]);
+
+
+    const handleVideoRetry = () => {
+        const v = videoRef.current;
+        if (!v) return;
+        setVideoStatus('loading');
+        v.load();
+        v.play().catch(() => {});
+    };
+
+    // Renderizar el video en un portal al <body> para garantizar que sea full-viewport
+    const videoPortal = (typeof document !== 'undefined') ? createPortal(
+        <div className="hero-media" aria-hidden={true}>
+            <video
+                ref={videoRef}
+                className="hero-video"
+                src="/videos/hand-reading.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                poster="/videos/hand-reading-poster.jpg"
+            />
+        </div>,
+        document.body
+    ) : null;
+
+    const handleGoogleLogin = async (credentialResponse: any) => {
+        try {
+            // Decodificar el token JWT para obtener email y nombre
+            const base64Url = credentialResponse.credential?.split('.')[1];
+            if (!base64Url) {
+                setTituloError("Error de Autenticación");
+                setMensaje("No se pudo procesar la información de Google.");
+                setTipoMensaje("error");
+                setMostrarModalMensaje(true);
+                return;
+            }
+
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join('')
+            );
+            const payload = JSON.parse(jsonPayload);
+
+            const data = await loginWithGoogle({
+                idToken: credentialResponse.credential || '',
+                email: payload.email || '',
+                name: payload.name || '',
+                googleId: payload.sub || ''
+            });
+
+            const usuario: Usuario = {
+                usuarioID: data.usuarioID,
+                nombre: data.nombreUsuario || data.nombre,
+                emailInstitucional: payload.email || '',
+                codigoUniversitario: data.codigoUniversitario || '',
+                rol: data.rol
+            };
+
+            setMensaje("¡Bienvenido " + usuario.nombre + "!");
+            setTipoMensaje("success");
+            setTituloError("");
+            setMostrarModalMensaje(true);
+            login(usuario);
+        } catch (err: any) {
+            console.error('Error en login SSO:', err);
+            setTituloError("Error de Autenticación");
+            const mensajeError = err.response?.data?.mensaje || 
+                "No se pudo autenticar con Google. Verifica que tu email sea institucional (@unmsm.edu.pe).";
+            setMensaje(mensajeError);
+            setTipoMensaje("error");
+            setMostrarModalMensaje(true);
+        }
+    };
+
+>>>>>>> Stashed changes
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMensaje("");
@@ -112,6 +220,7 @@ const Login: React.FC = () => {
 
     return (
         <div className="login-page">
+            {videoPortal}
             {/* Overlay animado */}
             {errorConexion && (
                 <div className="login-modal-overlay">
@@ -151,6 +260,7 @@ const Login: React.FC = () => {
 
             <main className="wrap">
                 <section className="hero animate-fade-in">
+<<<<<<< Updated upstream
                     <div className="brand">
                         <div className="logo animate-pop">📘</div>
                         <div>
@@ -158,6 +268,18 @@ const Login: React.FC = () => {
                             <p className="subtitle">
                                 Accede a tus préstamos y recursos digitales
                             </p>
+=======
+
+                    <div className="hero-top-box">
+                        <div className="brand">
+                            <div className="logo animate-pop"></div>
+                            <div>
+                                <h1 className="title">Biblioteca FISI · UNMSM</h1>
+                                <p className="subtitle">
+                                    Accede a tus préstamos y recursos digitales
+                                </p>
+                            </div>
+>>>>>>> Stashed changes
                         </div>
                     </div>
                     <div className="features">
@@ -178,24 +300,39 @@ const Login: React.FC = () => {
                     <p>Usa tu correo institucional o accede con Google</p>
                     <form onSubmit={handleSubmit}>
                         <div>
+<<<<<<< Updated upstream
                             <label htmlFor="email">Email Institucional</label>
                             <div className="login-input login-input-email">
                                 <input
                                     type="text"
                                     id="email"
                                     placeholder="tu"
+=======
+                            <label htmlFor="email">Correo institucional</label>
+                            <div className="login-input login-input-email" aria-hidden={false}>
+                                <input
+                                    type="text"
+                                    id="email"
+                                    placeholder="nombre.apellido"
+>>>>>>> Stashed changes
                                     required
                                     value={email}
                                     onChange={handleEmailChange}
+                                    aria-label="Nombre de usuario (sin @unmsm.edu.pe)"
                                     style={{ 
                                         color: '#1f2937', 
                                         WebkitTextFillColor: '#1f2937'
                                     }}
                                 />
+<<<<<<< Updated upstream
                                 <span>
                                     @unmsm.edu.pe
                                 </span>
+=======
+                                <span className="email-domain">@unmsm.edu.pe</span>
+>>>>>>> Stashed changes
                             </div>
+                            
                         </div>
                         <div>
                             <label htmlFor="password">Contraseña</label>

@@ -669,6 +669,33 @@
     gap: 0.25rem;
 }
 
+.pagination-input {
+    width: 3.25rem;
+    height: 2.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #4A5A66;
+    background: #3A4A56;
+    color: #B0BEC5;
+    text-align: center;
+}
+.pagination-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    background: #4A5A66;
+    color: #fff;
+}
+
+.pagination-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: #B0BEC5;
+}
+
 .pagination-number {
     width: 2.5rem;
     height: 2.5rem;

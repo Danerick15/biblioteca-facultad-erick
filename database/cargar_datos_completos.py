@@ -113,6 +113,26 @@ def cargar_datos_completos():
         df = pd.read_csv('CATALOGO DE LIBROS FISI RC.csv', sep=';', encoding='utf-8')
         print(f"CSV leído: {len(df)} filas")
         
+        # --- Normalizar nombres de columnas leídos del CSV (manejar acentos/espacios/case)
+        def _norm_col(s):
+            s = str(s).strip()
+            s = unicodedata.normalize('NFD', s).encode('ascii', 'ignore').decode('ascii')
+            s = re.sub(r"\s+", "", s)
+            return s
+
+        orig_cols = list(df.columns)
+        norm_map = { _norm_col(c).lower(): c for c in orig_cols }
+
+        # Lista de nombres esperados en el script; si existen en el CSV los mapeamos
+        expected_names = ['TITULO', 'Autor', 'Año', 'LCCSeccion', 'LCCNumero', 'LCCCutter', 'Ejemplar', 'Observaciones']
+        for en in expected_names:
+            key = _norm_col(en).lower()
+            if key in norm_map:
+                df[en] = df[norm_map[key]]
+            else:
+                # Si no existe, crear columna vacía para evitar KeyError posteriores
+                df[en] = pd.NA
+
         # 1. CREAR AUTORES ÚNICOS
         print("Creando autores...")
         autores_unicos_csv = df['Autor'].dropna().unique()
@@ -197,7 +217,14 @@ def cargar_datos_completos():
         for categoria in categorias_unicas:
             categoria_limpia = limpiar_texto(categoria)
             if categoria_limpia and len(categoria_limpia) > 0:
+                # Verificar existencia previa por nombre (evita violaciones UNIQUE)
                 try:
+                    cursor.execute("SELECT CategoriaID FROM Categorias WHERE Nombre = ?", (categoria_limpia,))
+                    existing = cursor.fetchone()
+                    if existing and existing[0]:
+                        categorias_dict[categoria_limpia] = existing[0]
+                        continue
+
                     cursor.execute("""
                         INSERT INTO Categorias (Nombre)
                         VALUES (?)
@@ -208,15 +235,17 @@ def cargar_datos_completos():
                         categoria_id = cursor.fetchone()[0]
                     categorias_dict[categoria_limpia] = categoria_id
                 except Exception as e:
-                    if "duplicate key" in str(e).lower():
-                        # Si ya existe, obtener su ID
+                    # Si rara vez ocurre una violación de unique por race, intentar recuperar el id
+                    try:
                         cursor.execute("SELECT CategoriaID FROM Categorias WHERE Nombre = ?", (categoria_limpia,))
                         result = cursor.fetchone()
                         if result:
                             categorias_dict[categoria_limpia] = result[0]
-                    else:
-                        print(f"Error insertando categoría '{categoria_limpia}': {e}")
-                        continue
+                            continue
+                    except Exception:
+                        pass
+                    print(f"Error insertando categoría '{categoria_limpia}': {e}")
+                    continue
         
         print(f"Categorías creadas: {len(categorias_dict)}")
         

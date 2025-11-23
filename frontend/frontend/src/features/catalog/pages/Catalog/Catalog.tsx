@@ -64,6 +64,40 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
     // Paginación
     const [paginaActual, setPaginaActual] = useState(1);
     const [librosPorPagina] = useState(25);
+    const [paginaInput, setPaginaInput] = useState<string>('1');
+    
+    // Devuelve un arreglo de items para mostrar en la paginación: números y '...' como separador
+    const getPageItems = (current: number, total: number, maxButtons = 5) => {
+        const items: Array<number | string> = [];
+        if (total <= maxButtons) {
+            for (let i = 1; i <= total; i++) items.push(i);
+            return items;
+        }
+
+        const half = Math.floor(maxButtons / 2);
+        let start = Math.max(2, current - half);
+        let end = Math.min(total - 1, current + half);
+
+        // Adjust when near edges
+        if (current - 1 <= half) {
+            start = 2;
+            end = Math.min(total - 1, maxButtons);
+        }
+        if (total - current <= half) {
+            start = Math.max(2, total - maxButtons + 2);
+            end = total - 1;
+        }
+
+        items.push(1);
+        if (start > 2) items.push('...');
+
+        for (let i = start; i <= end; i++) items.push(i);
+
+        if (end < total - 1) items.push('...');
+        items.push(total);
+
+        return items;
+    };
     
     // Filtros
     const [filtros, setFiltros] = useState<Filtros>({
@@ -87,6 +121,11 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
     useEffect(() => {
         aplicarFiltros();
     }, [libros, filtros, ordenarPor, direccionOrden]);
+
+    // Mantener sincronizado el input de página con la página actual
+    useEffect(() => {
+        setPaginaInput(String(paginaActual));
+    }, [paginaActual]);
 
     // ===== FUNCIONES =====
     const cargarLibros = async () => {
@@ -302,6 +341,11 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
         filtrados: librosFiltrados.length
     }), [libros, librosFiltrados]);
 
+    const irAPagina = (num: number) => {
+        const n = Math.max(1, Math.min(totalPaginas || 1, Math.floor(num)));
+        setPaginaActual(n);
+    };
+
     // ===== RENDERIZADO =====
     if (cargando) {
         return <PageLoader message="Cargando catálogo de libros..." />;
@@ -431,6 +475,64 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
             </div>
 
             {/* Tabla de libros */}
+            {/* Paginación superior (replica lógica inferior) */}
+            {totalPaginas > 1 && (
+                <div className="catalog-pagination top-pagination">
+                    <div className="pagination-info">
+                        Mostrando {inicio + 1} - {Math.min(fin, librosFiltrados.length)} de {librosFiltrados.length} libros
+                    </div>
+                    <div className="pagination-controls">
+                        <button 
+                            className="pagination-btn"
+                            onClick={() => setPaginaActual(prev => Math.max(1, prev - 1))}
+                            disabled={paginaActual === 1}
+                        >
+                            <ChevronLeft className="icon" />
+                            Anterior
+                        </button>
+
+                        <div className="pagination-numbers">
+                            {getPageItems(paginaActual, totalPaginas, 5).map((item, idx) => {
+                                if (item === '...') return <span key={`e-${idx}`} className="pagination-ellipsis">…</span>;
+                                const numero = Number(item);
+                                return (
+                                    <button
+                                        key={numero}
+                                        className={`pagination-number ${paginaActual === numero ? 'active' : ''}`}
+                                        onClick={() => setPaginaActual(numero)}
+                                    >
+                                        {numero}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.5rem' }}>
+                            <label style={{ color: '#B0BEC5', fontSize: '0.85rem' }}>Ir a</label>
+                            <input
+                                className="pagination-input"
+                                value={paginaInput}
+                                onChange={(e) => setPaginaInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        const v = Number(paginaInput);
+                                        if (!Number.isNaN(v)) irAPagina(v);
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        <button
+                            className="pagination-btn"
+                            onClick={() => setPaginaActual(prev => Math.min(totalPaginas, prev + 1))}
+                            disabled={paginaActual === totalPaginas}
+                        >
+                            Siguiente
+                            <ChevronRight className="icon" />
+                        </button>
+                    </div>
+                </div>
+            )}
             <div className="catalog-table-container">
                 <table className="catalog-table">
                     <thead>
@@ -591,8 +693,9 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
                         </button>
                         
                         <div className="pagination-numbers">
-                            {Array.from({ length: Math.min(5, totalPaginas) }, (_, i) => {
-                                const numero = i + 1;
+                            {getPageItems(paginaActual, totalPaginas, 5).map((item, idx) => {
+                                if (item === '...') return <span key={`e-b-${idx}`} className="pagination-ellipsis">…</span>;
+                                const numero = Number(item);
                                 return (
                                     <button
                                         key={numero}

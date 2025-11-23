@@ -14,6 +14,66 @@
     --max-width: 980px;
 }
 
+/* --- Video superior y PNG inferior como fondos fijos --- */
+.dashboard-media-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55vh; /* ocupa la parte superior de la pantalla */
+    overflow: hidden;
+    z-index: 1; /* por encima del PNG pero detrás del contenido */
+    pointer-events: none;
+}
+.dashboard-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: translateZ(0);
+    display: block;
+    transition: opacity 300ms ease, transform 400ms ease;
+    opacity: 1;
+}
+
+.dashboard-media-bottom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh; /* cubrir toda la ventana para que no se recorte */
+    overflow: hidden;
+    z-index: 0; /* detrás del video */
+    pointer-events: none;
+}
+.dashboard-media-bottom img {
+    width: 100%;
+    height: 100vh; /* cubrir la ventana completa */
+    object-fit: cover;
+    object-position: center top;
+    opacity: 0; /* iniciamos invisible; se mostrará al scrollear */
+    transition: opacity 300ms ease, transform 400ms ease;
+    display: block;
+}
+
+/* Hacer que el contenido del dashboard esté por encima de los fondos */
+.page-content {
+    position: relative;
+    z-index: 10;
+    background: transparent;
+}
+
+/* Ajuste: asegurar espacio superior para que el contenido no quede encima del video */
+.dashboard-header {
+    margin-top: 2rem;
+    padding-top: calc(55vh + 1rem); /* empuja el header para que no quede encima del video */
+}
+
+@media (max-width: 768px) {
+    .dashboard-media-top { height: 40vh; }
+    .dashboard-media-bottom { height: 60vh; }
+    .dashboard-header { padding-top: calc(40vh + 0.75rem); }
+}
+
 /* El fondo ahora se maneja desde el Layout principal */
 .page-content {
     width: 100%;

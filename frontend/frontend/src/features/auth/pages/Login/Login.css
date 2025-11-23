@@ -4,9 +4,11 @@
 body {
     margin: 0 !important;
     padding: 0 !important;
+    background: var(--bg-1); /* fondo claro por defecto; el video se mostrará encima */
 }
 
 :root {
+<<<<<<< Updated upstream
     --bg-1: linear-gradient(135deg,#0a2342 0%, #07192f 40%, #04101f 100%);
     --accent: #f0d77b;
     --accent-2: #f0d77b;
@@ -17,18 +19,45 @@ body {
     --shadow: 0 12px 34px rgba(0,0,0,0.7);
     --glass-border: rgba(255,255,255,0.1);
     --max-width: 980px;
+=======
+    --bg-1: linear-gradient(180deg,#f8fafc 0%, #eef3fb 100%);
+    --accent: #0f6bdc; /* azul institucional */
+    --accent-2: #0b57b8;
+    --glass: rgba(255,255,255,0.92);
+    --glass-2: rgba(255,255,255,0.92);
+    --muted: #475569;
+    --card-radius: 12px;
+    --shadow: 0 10px 30px rgba(2,6,23,0.08);
+    --glass-border: rgba(15,23,42,0.06);
+    --max-width: 1200px;
+    --dark-blue: #06283d;
+    --dark-blue-2: #0b3a57;
+    --yellow-glow: #fbbf24;
+    --orange-glow: #f59e0b;
+>>>>>>> Stashed changes
 }
 
 /* ===== ESTILOS ESPECÍFICOS DE LOGIN (ENCAPSULADOS) ===== */
 .login-page {
     margin: 0;
     min-height: 100vh;
+<<<<<<< Updated upstream
     background: linear-gradient(135deg, #1a365d 0%, #2d3748 25%, #1a202c 75%, #0f1419 100%);
+=======
+    background: transparent; /* transparente para no tapar el video fixed */
+>>>>>>> Stashed changes
     display: block;
     padding: 0;
     position: relative;
     font-family: var(--font-family-primary);
+<<<<<<< Updated upstream
+=======
+    overflow: hidden;
+    color: var(--dark-blue);
+>>>>>>> Stashed changes
 }
+
+/* (Se removió el indicador de diagnóstico del video) */
 
 
 .stage {
@@ -54,6 +83,7 @@ body {
 }
 
 .blob.a {
+<<<<<<< Updated upstream
     left: -12%;
     top: -8%;
     background: radial-gradient(circle at 30% 30%, var(--accent), transparent 50%);
@@ -64,6 +94,20 @@ body {
     bottom: -10%;
     background: radial-gradient(circle at 70% 70%, var(--accent-2), transparent 50%);
     animation-duration: 16s;
+=======
+    left: -5%;
+    top: -3%;
+    background: radial-gradient(circle at 40% 40%, rgba(11,97,220,0.10) 0%, rgba(11,97,220,0.06) 25%, transparent 55%);
+    box-shadow: 0 0 60px rgba(11,97,220,0.06);
+}
+
+.blob.b {
+    right: -4%;
+    bottom: -4%;
+    background: radial-gradient(circle at 60% 60%, rgba(11,97,220,0.08) 0%, rgba(11,97,220,0.04) 25%, transparent 55%);
+    animation-duration: 18s;
+    box-shadow: 0 0 60px rgba(11,97,220,0.05);
+>>>>>>> Stashed changes
 }
 
 @keyframes float {
@@ -76,6 +120,7 @@ body {
     position: relative;
     z-index: 10;
     width: 100%;
+<<<<<<< Updated upstream
     max-width: 100%;
     display: grid;
     grid-template-columns: 1fr 0.8fr;
@@ -83,24 +128,111 @@ body {
     align-items: center;
     backdrop-filter: blur(10px);
     padding: 2rem 2rem;
+=======
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    /* Hero amplio - Card de login más delgado */
+    grid-template-columns: 1fr 420px;
+    gap: 1.5rem;
+    align-items: start; /* empuja contenido hacia arriba para mostrar header en la parte superior */
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    padding-top: 2.5rem;
+>>>>>>> Stashed changes
     height: 100vh;
     box-sizing: border-box;
 }
 
+
 .hero {
     padding: 2.5rem;
+<<<<<<< Updated upstream
     border-radius: 1.5rem;
     background: rgba(255,255,255,0.08);
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
     border: 1px solid rgba(255,255,255,0.15);
     color: #fff;
     backdrop-filter: blur(20px);
+=======
+    border-radius: 1rem;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    color: var(--dark-blue);
+    backdrop-filter: none;
+>>>>>>> Stashed changes
     transition: all 0.3s ease;
     max-width: 500px;
     height: fit-content;
     width: 100%;
+<<<<<<< Updated upstream
     justify-self: center;
+=======
+    position: relative;
+    overflow: visible;
+>>>>>>> Stashed changes
 }
+
+/* Contenedor de media (video) dentro del hero. El video se coloca detrás del contenido. */
+.hero {
+    position: relative;
+    overflow: hidden;
+}
+
+
+/* Mostrar video a pantalla completa (fixed) */
+.hero-media {
+    position: fixed;
+    inset: 0;
+    z-index: 0 !important; /* asegurar que la media quede detrás del contenido */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.hero-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    filter: none; /* quitar filtros para asegurar visibilidad */
+    transform: translateZ(0) scale(1.02); /* ligero escalado para evitar bordes negros */
+    opacity: 1;
+    z-index: 0; /* asegurar que el propio video no cree un stacking extra */
+}
+
+/* Aseguramos que el contenido del hero (excepto la media) quede por encima del video */
+.hero > :not(.hero-media) {
+    position: relative;
+    z-index: 200 !important; /* forzar que el contenido del hero quede encima del video */
+}
+
+/* Forzar que la tarjeta de login quede siempre por encima del video */
+.login-card {
+    z-index: 300 !important;
+    position: relative;
+}
+
+/* Recuadro superior que contiene el título y subtítulo */
+.hero-top-box {
+    display: inline-block;
+    background: rgba(255,255,255,0.96);
+    color: var(--dark-blue);
+    padding: 0.9rem 1.1rem;
+    border-radius: 0.8rem;
+    box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 1rem;
+    max-width: 640px;
+}
+
+.hero-top-box .title { color: var(--dark-blue); margin: 0; }
+.hero-top-box .subtitle { color: var(--muted); margin: 0; }
 
 .hero:hover {
     background: rgba(255,255,255,0.12);
@@ -175,6 +307,7 @@ body {
 }
 
 .login-card {
+<<<<<<< Updated upstream
     padding: 2.5rem;
     border-radius: 1.5rem;
     width: 60%;
@@ -184,6 +317,17 @@ body {
     border: 1px solid rgba(255,255,255,0.2);
     backdrop-filter: blur(20px);
     transition: all 0.4s ease;
+=======
+    padding: 1.25rem 1.5rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff !important;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid rgba(0, 0, 0, 0.04) !important;
+    backdrop-filter: none !important;
+    transition: all 0.25s ease;
+>>>>>>> Stashed changes
 }
 
 /* Textos específicos de la sección login-card (fondo blanco - texto oscuro) */
@@ -237,7 +381,11 @@ form > *:nth-child(4) { animation-delay: 0.4s; }
 form {
     display: flex;
     flex-direction: column;
+<<<<<<< Updated upstream
     gap: 1.25rem;
+=======
+    gap: 1rem;
+>>>>>>> Stashed changes
 }
 
 .login-page label {
@@ -253,8 +401,9 @@ form {
 .login-input {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     background: #ffffff;
+<<<<<<< Updated upstream
     padding: 1rem 1.25rem;
     border-radius: 0.75rem;
     border: 2px solid #e5e7eb;
@@ -262,6 +411,14 @@ form {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     min-width: 0; /* Permite que el contenedor se reduzca */
     overflow: hidden; /* Evita desbordamiento */
+=======
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.6rem;
+    border: 1px solid #eef2f7;
+    transition: all 0.2s ease;
+    min-width: 0;
+    overflow: hidden;
+>>>>>>> Stashed changes
 }
 
 /* Estilos específicos para el input de email con sufijo */
@@ -278,12 +435,13 @@ form {
     outline: none;
     color: #1f2937 !important;
     -webkit-text-fill-color: #1f2937 !important;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
     padding: 0;
     font-family: var(--font-family-primary);
 }
 
+<<<<<<< Updated upstream
 .login-input-email span {
     flex: 0 0 auto;
     color: #9ca3af;
@@ -293,6 +451,19 @@ form {
     font-weight: 500;
     white-space: nowrap;
     margin-left: 0.25rem;
+=======
+/* Sufijo de dominio fijo (@unmsm.edu.pe) - no editable */
+.login-input-email .email-domain {
+    margin-left: 0.75rem;
+    color: #6b7280;
+    font-weight: 600;
+    background: rgba(0,0,0,0.03);
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.5rem;
+    border: 1px solid #eef2ff;
+    white-space: nowrap;
+    font-size: 0.95rem;
+>>>>>>> Stashed changes
 }
 
 /* Estilos para el input de contraseña con botón de mostrar/ocultar */
@@ -404,18 +575,18 @@ form {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem 2rem;
+    gap: 0.4rem;
+    padding: 0.75rem 1.25rem;
     border: none;
-    border-radius: 0.75rem;
-    font-size: 1rem;
+    border-radius: 0.6rem;
+    font-size: 0.95rem;
     font-weight: 600;
     font-family: var(--font-family-primary);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
-    min-height: 3rem;
+    min-height: 2.6rem;
     text-decoration: none;
     box-sizing: border-box;
 }
@@ -858,3 +1029,54 @@ form {
     font-weight: 500;
     text-align: center;
 }
+
+/* ===== Aumentar y posicionar sección de INICIA SESIÓN sin tocar la sección izquierda ===== */
+/* Desktop ancho: escala 10% y ligero desplazamiento a la derecha para equilibrar composición */
+@media (min-width: 1025px) {
+    .login-card {
+        transform: translateX(4%) scale(1.10);
+        transform-origin: center right;
+        transition: transform 0.28s cubic-bezier(.2,.9,.3,1);
+        will-change: transform;
+    }
+
+    .login-card h2 {
+        font-size: 1.925rem; /* ~10% más */
+    }
+
+    .login-input {
+        padding: 0.72rem 0.9rem;
+    }
+
+    .login-input-email input[type="text"],
+    .login-input-password input {
+        font-size: 1.05rem;
+    }
+
+    .login-page .btn {
+        font-size: 1.05rem;
+        padding: 0.85rem 1.5rem;
+    }
+
+    .login-input-email .email-domain {
+        font-size: 1.05rem;
+        padding: 0.5rem 0.7rem;
+    }
+}
+
+/* Pantallas medianas: escala moderada para no romper layout */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .login-card {
+        transform: translateX(2%) scale(1.07);
+        transform-origin: center right;
+        transition: transform 0.25s ease;
+        will-change: transform;
+    }
+
+    .login-card h2 { font-size: 1.825rem; }
+    .login-input { padding: 0.68rem 0.85rem; }
+    .login-page .btn { font-size: 1.02rem; padding: 0.8rem 1.35rem; }
+    .login-input-email .email-domain { font-size: 1.02rem; }
+}
+
+/* Mantener la sección izquierda (hero) sin cambios: usamos transform en la tarjeta para no alterar el flow */

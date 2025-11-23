@@ -10,15 +10,25 @@
     "zonaHoraria": "America/Lima"
   },
   "prestamos": {
+<<<<<<< Updated upstream
     "diasPrestamoEstudiante": 1,
     "diasPrestamoProfesor": 4,
     "maxPrestamosEstudiante": 2,
+=======
+    "diasPrestamoEstudiante": 3,
+    "diasPrestamoProfesor": 7,
+    "maxPrestamosEstudiante": 3,
+>>>>>>> Stashed changes
     "maxPrestamosProfesor": 5,
     "maxRenovaciones": 3,
     "diasGracia": 2
   },
   "multas": {
+<<<<<<< Updated upstream
     "montoMultaPorDia": 1,
+=======
+    "montoMultaPorDia": 2,
+>>>>>>> Stashed changes
     "multaMaxima": 50,
     "descuentoMulta": 50,
     "diasDescuento": 3

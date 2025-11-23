@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../../../hooks/useAuth';
 import { useNavigation } from '../../../../hooks/useNavigation';
 import { type Usuario } from '../../../../contexts/AuthContextTypes';
@@ -49,6 +50,46 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario }) => {
 
     useEffect(() => {
         cargarDatosDashboard();
+    }, []);
+
+    // Manejar el efecto de fade entre video (arriba) y PNG (abajo) según scroll
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const updateElements = () => {
+            const videoEl = document.querySelector<HTMLVideoElement>('.dashboard-video');
+            const imgEl = document.querySelector<HTMLImageElement>('.dashboard-media-bottom img');
+
+            const scrollY = window.scrollY || window.pageYOffset || 0;
+            const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+            const p = maxScroll > 0 ? Math.max(0, Math.min(1, scrollY / maxScroll)) : 0;
+
+            // video fades out as user reaches bottom; image fades in
+            if (videoEl) {
+                videoEl.style.opacity = String(1 - p);
+                videoEl.style.transform = `scale(${1 - p * 0.02})`;
+            }
+            if (imgEl) {
+                imgEl.style.opacity = String(p);
+            }
+        };
+
+        let rafId: number | null = null;
+        const onScroll = () => {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(updateElements);
+        };
+
+        // Init call
+        updateElements();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
+            if (rafId) cancelAnimationFrame(rafId);
+        };
     }, []);
 
     const cargarDatosDashboard = async () => {
@@ -147,6 +188,29 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario }) => {
         return <PageLoader type="dashboard" message="Cargando tu dashboard personalizado..." />;
     }
 
+    // Video y PNG como fondos (se renderizan en portal al body para evitar constraints)
+    const videoNode = (typeof document !== 'undefined') ? createPortal(
+        <div className="dashboard-media-top" aria-hidden>
+            <video
+                className="dashboard-video"
+                src="/videos/hand-reading.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+            />
+        </div>, document.body
+    ) : null;
+
+    const bottomNode = (typeof document !== 'undefined') ? createPortal(
+        <div className="dashboard-media-bottom" aria-hidden>
+            <img src="/images/bg_luis5.png" alt="fondo inferior" />
+        </div>, document.body
+    ) : null;
+
+    
+
     if (error) {
         return (
             <div className="dashboard-error">
@@ -162,6 +226,8 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario }) => {
 
     return (
         <div className="page-content">
+            {videoNode}
+            {bottomNode}
             {/* Header del Dashboard */}
             <div className="dashboard-header">
                 <div className="welcome-section">
