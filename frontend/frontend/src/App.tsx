@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ConfiguracionProvider } from "./contexts/ConfiguracionContext";
 import { ToastProvider } from './components/Toast';
 import { useAuth } from "./hooks/useAuth";
 import "./App.css";
@@ -33,6 +34,9 @@ const AdminReturns = lazy(() => import("./features/admin/returns/pages/AdminRetu
 const Reports = lazy(() => import("./features/admin/reports/pages/Reports/Reports"));
 const UserManagement = lazy(() => import("./features/admin/users/pages/UserManagement/UserManagement"));
 const SystemConfig = lazy(() => import("./features/admin/config/pages/SystemConfig/SystemConfig"));
+
+// Lazy loading de páginas de profesor
+const ProfessorRecommendations = lazy(() => import("./features/professor/recommendations/pages/ProfessorRecommendations/ProfessorRecommendations"));
 
 // Lazy loading de páginas especiales
 const NotFound = lazy(() => import("./features/errors/pages/NotFound/NotFound"));
@@ -295,6 +299,21 @@ function AppContent() {
                             }
                         />
 
+                        {/* Rutas de profesor */}
+                        <Route
+                            path="profesor/recomendaciones"
+                            element={
+                                <ProtectedRoute
+                                    usuario={usuario!}
+                                    rolesPermitidos={['Profesor']}
+                                >
+                                    <Suspense fallback={<LoadingSpinner message="Cargando recomendaciones..." />}>
+                                        <ProfessorRecommendations />
+                                    </Suspense>
+                                </ProtectedRoute>
+                            }
+                        />
+
                 {/* Ruta 404 - página personalizada */}
                 <Route 
                     path="*" 
@@ -313,7 +332,9 @@ function App() {
     return (
         <ToastProvider>
             <AuthProvider>
-                <AppContent />
+                <ConfiguracionProvider>
+                    <AppContent />
+                </ConfiguracionProvider>
             </AuthProvider>
         </ToastProvider>
     );

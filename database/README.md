@@ -1,98 +1,108 @@
-# Base de Datos Biblioteca FISI
+# 🗄️ Base de Datos - Scripts y Datos
 
-## Archivos Necesarios para Recrear la Base de Datos
+Esta carpeta contiene todos los scripts SQL, scripts Python y archivos de datos necesarios para configurar y gestionar la base de datos del sistema.
 
-### 1. Archivos de Datos
-- `CATALOGO DE LIBROS FISI RC.csv` - Catálogo original con todos los libros y ejemplares
-- `CATALOGO DE LIBROS FISI RC.xlsx` - Versión Excel del catálogo
+---
 
-### 2. Scripts de Base de Datos
-- `BibliotecaFISI_Simplificado.sql` - Script SQL para crear la estructura de la base de datos
+## 📁 Estructura
 
-### 3. Scripts de Migración
-- `cargar_datos_completos.py` - Script Python para cargar TODOS los datos (libros, autores, categorías, ejemplares)
-- `crear_administrador.py` - Script Python para crear un administrador inicial
-- `verificar_conexion.py` - Script Python para verificar la conexión a SQL Server y detectar instancias disponibles
-
-## Instrucciones para Recrear la Base de Datos
-
-### Paso 0: Verificar Conexión a SQL Server (Opcional pero Recomendado)
-Si tienes problemas de conexión, ejecuta primero el script de verificación:
-```bash
-python verificar_conexion.py
 ```
-Este script te ayudará a:
-- Detectar qué instancias de SQL Server están disponibles
-- Verificar qué servicios de SQL Server están ejecutándose
-- Probar conexiones con diferentes configuraciones
-- Identificar qué servidor usar para los scripts de carga
+database/
+├── scripts/
+│   ├── sql/              # Scripts SQL
+│   │   ├── BibliotecaFISI_Simplificado.sql  # Script principal de creación
+│   │   ├── agregar_libros_digitales.sql
+│   │   ├── crear_tabla_api_keys.sql
+│   │   ├── crear_profesor.sql
+│   │   ├── eliminar_administrador.sql
+│   │   └── ver_tablas.sql
+│   └── python/           # Scripts Python
+│       ├── cargar_datos_completos.py
+│       ├── crear_administrador.py
+│       ├── crear_profesor.py
+│       ├── generar_reportes.py
+│       └── verificar_conexion.py
+└── data/                 # Archivos de datos
+    ├── CATALOGO DE LIBROS FISI RC.csv
+    └── reportes_biblioteca.json
+```
 
-### Paso 1: Crear la Base de Datos
+---
+
+## 🚀 Uso Rápido
+
+### 1. Crear la Base de Datos
+
+Ejecuta el script principal en SQL Server Management Studio:
+
 ```sql
--- Ejecutar en SQL Server Management Studio
--- El script BibliotecaFISI_Simplificado.sql contiene toda la estructura
+-- Archivo: scripts/sql/BibliotecaFISI_Simplificado.sql
 ```
 
-### Paso 2: Instalar Dependencias Python
-```bash
-pip install pyodbc pandas
-```
+### 2. Cargar Datos
 
-### Paso 3: Cargar TODOS los Datos
 ```bash
+cd scripts/python
 python cargar_datos_completos.py
 ```
-**Nota:** El script ahora intenta conectarse automáticamente a diferentes configuraciones comunes de SQL Server (localhost, localhost\SQLEXPRESS, etc.)
 
-### Paso 4: Crear Administrador Inicial
+### 3. Crear Usuario Administrador
+
 ```bash
 python crear_administrador.py
 ```
 
-## Resultado Final
-- **1,326 libros** únicos (después de limpieza de duplicados)
-- **3,373 ejemplares** totales
-- **974 autores** únicos (divididos correctamente por comas)
-- **1,469 relaciones** libro-autor
-- **1,325 relaciones** libro-categoría
-- **34 categorías** LCC
-- Todos los ejemplares en estado "Disponible"
-- **0 libros huérfanos** (todos tienen ejemplares y autores)
+---
 
-## Nota Importante
-La lógica de deduplicación usa **todas las columnas bibliográficas** (Título, Autor, Año, Signatura LCC) para identificar libros únicos, no solo el título. Esto significa que libros con el mismo título pero diferentes autores, años o signaturas se consideran libros distintos.
+## 📚 Documentación Completa
 
-## Limpieza Automática
-El script incluye una **limpieza automática** que elimina libros huérfanos (sin ejemplares y sin autores) que pueden generarse durante el proceso de carga. Esto garantiza que todos los libros en la base de datos tengan datos completos y sean funcionales.
+Para una guía detallada, consulta:
+- **[Guía de Configuración de Base de Datos](../docs/guides/database-setup.md)** - Instrucciones completas paso a paso
 
-## Solución de Problemas de Conexión
+---
 
-Si encuentras errores de conexión como "Named Pipes Provider: Could not open a connection to SQL Server":
+## 📋 Scripts Disponibles
 
-1. **Verifica que SQL Server esté ejecutándose:**
-   - Abre "SQL Server Configuration Manager"
-   - Verifica que el servicio "SQL Server (MSSQLSERVER)" o "SQL Server (SQLEXPRESS)" esté en estado "Running"
-   - Si no está ejecutándose, inícialo desde el Administrador de tareas o Services
+### Scripts SQL
 
-2. **Ejecuta el script de verificación:**
-   ```bash
-   python verificar_conexion.py
-   ```
-   Esto te mostrará qué instancias están disponibles y funcionando.
+| Script | Descripción |
+|--------|-------------|
+| `BibliotecaFISI_Simplificado.sql` | Script principal - Crea toda la estructura de la BD |
+| `agregar_libros_digitales.sql` | Agrega soporte para libros digitales |
+| `crear_tabla_api_keys.sql` | Crea tabla para API Keys |
+| `crear_profesor.sql` | Crea usuario profesor de prueba |
+| `eliminar_administrador.sql` | Elimina usuario administrador |
+| `ver_tablas.sql` | Muestra información de todas las tablas |
 
-3. **Configuraciones comunes de SQL Server:**
-   - SQL Server por defecto: `localhost`
-   - SQL Server Express: `localhost\SQLEXPRESS`
-   - Si tienes una instancia con nombre personalizado: `localhost\NOMBRE_INSTANCIA`
+### Scripts Python
 
-4. **Si ninguna configuración funciona:**
-   - Verifica que la base de datos "BibliotecaFISI" exista
-   - Verifica que tengas permisos de autenticación de Windows
-   - Verifica que el puerto 1433 esté abierto (si usas TCP/IP)
+| Script | Descripción |
+|--------|-------------|
+| `cargar_datos_completos.py` | Carga todos los datos (libros, autores, ejemplares) |
+| `crear_administrador.py` | Crea usuario administrador |
+| `crear_profesor.py` | Crea usuario profesor |
+| `generar_reportes.py` | Genera reportes del sistema |
+| `verificar_conexion.py` | Verifica conexión a SQL Server |
 
-## Requisitos del Sistema
-- SQL Server (local o remoto)
-- Python 3.x
-- pyodbc
-- pandas
-- ODBC Driver 17 for SQL Server
+---
+
+## 📦 Archivos de Datos
+
+- **`CATALOGO DE LIBROS FISI RC.csv`** - Catálogo completo de libros con 3,374 ejemplares
+- **`reportes_biblioteca.json`** - Configuración de reportes disponibles
+
+---
+
+## ⚠️ Notas Importantes
+
+- Ejecuta los scripts SQL en el orden indicado en la documentación
+- Los scripts Python requieren Python 3.7+ y las dependencias instaladas
+- Verifica la conexión a SQL Server antes de ejecutar scripts
+
+---
+
+## 🔗 Enlaces Útiles
+
+- [Documentación de Base de Datos](../docs/guides/database-setup.md)
+- [Problemas de Base de Datos](../docs/troubleshooting/database-issues.md)
+

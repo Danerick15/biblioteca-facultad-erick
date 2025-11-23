@@ -1,8 +1,8 @@
 {
   "general": {
     "nombreBiblioteca": "Biblioteca FISI - Universidad Nacional de Ingeniería",
-    "direccion": "Av. Amezaga, Ciudad Universitaria, Lima",
-    "telefono": "(01) 6197000",
+    "direccion": "Av. Túpac Amaru 210, Rímac, Lima",
+    "telefono": "+51 1 481 1070",
     "email": "biblioteca@fisi.edu.pe",
     "sitioWeb": "https://www.fisi.edu.pe/biblioteca",
     "moneda": "PEN",
@@ -10,42 +10,32 @@
     "zonaHoraria": "America/Lima"
   },
   "prestamos": {
-<<<<<<< Updated upstream
-    "diasPrestamoEstudiante": 1,
-    "diasPrestamoProfesor": 4,
-    "maxPrestamosEstudiante": 2,
-=======
-    "diasPrestamoEstudiante": 3,
-    "diasPrestamoProfesor": 7,
+    "diasPrestamoEstudiante": 7,
+    "diasPrestamoProfesor": 14,
     "maxPrestamosEstudiante": 3,
->>>>>>> Stashed changes
     "maxPrestamosProfesor": 5,
-    "maxRenovaciones": 3,
-    "diasGracia": 2
+    "maxRenovaciones": 2,
+    "diasGracia": 1
   },
   "multas": {
-<<<<<<< Updated upstream
-    "montoMultaPorDia": 1,
-=======
-    "montoMultaPorDia": 2,
->>>>>>> Stashed changes
-    "multaMaxima": 50,
+    "montoMultaPorDia": 2.00,
+    "multaMaxima": 50.00,
     "descuentoMulta": 50,
     "diasDescuento": 3
   },
   "notificaciones": {
     "notificacionesEmail": true,
     "notificacionesSMS": false,
-    "recordatorioVencimiento": 2,
-    "recordatorioMulta": 2
+    "recordatorioVencimiento": 1,
+    "recordatorioMulta": 1
   },
   "seguridad": {
     "sesionTimeout": 30,
     "intentosLogin": 3,
-    "passwordMinLength": 6,
-    "requiereMayuscula": false,
-    "requiereNumero": false,
-    "requiereSimbolo": false
+    "passwordMinLength": 8,
+    "requiereMayuscula": true,
+    "requiereNumero": true,
+    "requiereSimbolo": true
   },
   "respaldo": {
     "backupAutomatico": true,
@@ -55,13 +45,13 @@
   "interfaz": {
     "tema": "oscuro",
     "elementosPorPagina": 20,
-    "mostrarImagenes": false,
+    "mostrarImagenes": true,
     "animaciones": true
   },
   "reportes": {
     "periodoPorDefecto": 6,
     "topNLibros": 10,
-    "topNUsuarios": 16,
+    "topNUsuarios": 10,
     "añoPorDefecto": 2025
   }
 }

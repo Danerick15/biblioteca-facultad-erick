@@ -42,6 +42,7 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario }) => {
     const [prestamos, setPrestamos] = useState<PrestamoDTO[]>([]);
     const [multas, setMultas] = useState<Multa[]>([]);
     const [resumenMultas, setResumenMultas] = useState<ResumenMultasDTO | null>(null);
+    const [perfilCompleto, setPerfilCompleto] = useState<any>(null);
     const [cargando, setCargando] = useState(true);
 
     // SEO
@@ -97,9 +98,10 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario }) => {
             setCargando(true);
             setError(null);
 
-            // Cargar datos básicos del perfil (opcional)
+            // Cargar datos básicos del perfil (incluye estadísticas)
             try {
-                await obtenerMiPerfil();
+                const perfilData = await obtenerMiPerfil();
+                setPerfilCompleto(perfilData);
             } catch {
                 console.warn('No se pudo cargar el perfil completo');
             }
@@ -342,7 +344,7 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario }) => {
                                 <CheckCircle size={28} />
                             </div>
                             <div className="metric-content">
-                                <h3>{prestamos.filter(p => p.estado === 'DEVUELTO').length}</h3>
+                                <h3>{perfilCompleto?.prestamosCompletados || 0}</h3>
                                 <p>Préstamos completados</p>
                                 <span className="metric-trend">Este año</span>
                             </div>

@@ -115,7 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const logout = async () => {
         try {
-            // Llamar al endpoint de logout del backend
+            // Llamar al endpoint de logout del backend para eliminar la cookie
             await logoutAPI();
         } catch (error) {
             console.warn('Error en logout del backend:', error);
@@ -126,6 +126,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setError(null);
             localStorage.removeItem("usuario");
             sessionStorage.removeItem("usuario");
+            
+            // Limpiar todas las cookies relacionadas manualmente (por si acaso)
+            document.cookie.split(";").forEach((c) => {
+                const eqPos = c.indexOf("=");
+                const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+                if (name.startsWith("NeoLibro")) {
+                    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                }
+            });
             
             // Notificar a otras pestañas
             window.dispatchEvent(new StorageEvent("storage", {

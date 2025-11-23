@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NeoLibroAPI.Interfaces;
 using NeoLibroAPI.Data;
 using NeoLibroAPI.Business;
+using NeoLibroAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +31,12 @@ builder.Services.AddScoped<IUsuarioBusiness, UsuarioBusiness>();
 
 // Registrar servicios NUEVOS con interfaces (MÓDULO LIBROS)
 builder.Services.AddScoped<ILibroRepository>(provider => new LibroRepository(connectionString));
-builder.Services.AddScoped<ILibroBusiness, LibroBusiness>();
+builder.Services.AddScoped<ILibroBusiness>(provider => new LibroBusiness(
+    provider.GetRequiredService<ILibroRepository>(),
+    provider.GetRequiredService<IAutorBusiness>(),
+    provider.GetRequiredService<ICategoriaBusiness>(),
+    provider.GetRequiredService<IEjemplarBusiness>()
+));
 
 // Registrar servicios NUEVOS con interfaces (MÓDULO EJEMPLARES)
 builder.Services.AddScoped<IEjemplarRepository>(provider => new EjemplarRepository(connectionString));
@@ -63,13 +69,26 @@ builder.Services.AddScoped<IAutorBusiness, AutorBusiness>();
 builder.Services.AddScoped<ICategoriaRepository>(provider => new CategoriaRepository(connectionString));
 builder.Services.AddScoped<ICategoriaBusiness, CategoriaBusiness>();
 
+// Registrar servicios NUEVOS con interfaces (MÓDULO RECOMENDACIONES)
+builder.Services.AddScoped<IRecomendacionRepository>(provider => new RecomendacionRepository(connectionString));
+builder.Services.AddScoped<IRecomendacionBusiness, RecomendacionBusiness>();
+
+// Registrar servicios NUEVOS con interfaces (MÓDULO API KEYS)
+builder.Services.AddScoped<IApiKeyRepository>(provider => new ApiKeyRepository(connectionString));
+
 builder.Services.AddAuthentication("MiCookieAuth")
     .AddCookie("MiCookieAuth", options =>
     {
         options.Cookie.Name = "NeoLibro.Auth";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.None; // Para DEV (HTTP)
+        // Configuración condicional: HTTPS en producción, HTTP en desarrollo
+        options.Cookie.SecurePolicy = builder.Environment.IsProduction() 
+            ? CookieSecurePolicy.Always 
+            : CookieSecurePolicy.None;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.Path = "/"; // Path específico para la cookie
+        // No establecer Domain para que sea específica del host (localhost)
+        // Esto evita que se comparta entre diferentes perfiles de navegador
         options.LoginPath = "/api/Usuarios/login";
         options.AccessDeniedPath = "/api/Usuarios/acceso-denegado";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
@@ -110,6 +129,19 @@ var app = builder.Build();
 
 
 app.UseCors("FrontendDev");
+
+// Registrar middleware de Rate Limiting (debe ir antes de UseAuthentication)
+var rateLimitingConfig = builder.Configuration.GetSection("RateLimiting");
+app.UseRateLimiting(options =>
+{
+    options.MaxRequests = rateLimitingConfig.GetValue<int>("MaxRequests", 5);
+    options.Window = TimeSpan.FromMinutes(rateLimitingConfig.GetValue<int>("WindowMinutes", 15));
+    options.ProtectedPaths = rateLimitingConfig.GetSection("ProtectedPaths").Get<List<string>>() 
+        ?? new List<string> { "/api/Auth", "/api/Usuarios/login" };
+});
+
+// Registrar middleware de API Key (debe ir antes de UseAuthentication)
+app.UseApiKeyMiddleware();
 
 if (app.Environment.IsDevelopment())
 {

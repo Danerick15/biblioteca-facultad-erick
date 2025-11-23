@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Clock, User, BarChart3, Users, Settings, Bell } from 'lucide-react';
+import { BookOpen, Clock, User, BarChart3, Users, Settings, Bell, BookMarked } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import './QuickActions.css';
 
@@ -15,7 +15,7 @@ interface QuickAction {
 
 const QuickActions: React.FC = () => {
     const navigate = useNavigate();
-    const { esAdmin } = useAuth();
+    const { esAdmin, esProfesor } = useAuth();
 
     // Acciones base para todos los usuarios
     const baseActions: QuickAction[] = [
@@ -50,6 +50,18 @@ const QuickActions: React.FC = () => {
             route: '/perfil',
             color: 'tertiary',
             description: 'Gestionar cuenta'
+        }
+    ];
+
+    // Acciones adicionales para profesores
+    const profesorActions: QuickAction[] = [
+        {
+            id: 'recomendaciones',
+            label: 'Mis Recomendaciones',
+            icon: <BookMarked size={24} />,
+            route: '/profesor/recomendaciones',
+            color: 'info',
+            description: 'Gestionar recomendaciones'
         }
     ];
 
@@ -97,6 +109,10 @@ const QuickActions: React.FC = () => {
                 action => action.id !== 'prestamos' && action.id !== 'reservas'
             );
             return [...baseActionsFiltradas, ...adminActions];
+        }
+        if (esProfesor()) {
+            // Para profesores, agregar acciones de profesor
+            return [...baseActions, ...profesorActions];
         }
         return baseActions;
     };

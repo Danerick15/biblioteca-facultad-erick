@@ -1,0 +1,25 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "cnnNeoLibroDB": "Server=TU_SERVIDOR;Database=BibliotecaFISI;User Id=TU_USUARIO;Password=TU_PASSWORD;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  },
+  "GoogleOAuth": {
+    "ClientId": "TU_CLIENT_ID_DE_PRODUCCION.apps.googleusercontent.com"
+  },
+  "RateLimiting": {
+    "MaxRequests": 5,
+    "WindowMinutes": 15,
+    "ProtectedPaths": [
+      "/api/Auth",
+      "/api/Usuarios/login",
+      "/api/Usuarios/registrar"
+    ]
+  }
+}
+

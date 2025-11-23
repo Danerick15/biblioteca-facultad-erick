@@ -35,6 +35,8 @@ namespace NeoLibroAPI.Data
                         l.LibroID, l.ISBN, l.Titulo, l.Editorial, l.AnioPublicacion,
                         l.Idioma, l.Paginas, l.LCCSeccion, l.LCCSeccion, l.LCCNumero,
                         l.LCCCutter, l.SignaturaLCC,
+                        l.RutaArchivoDigital, l.TipoArchivoDigital, l.TamañoArchivoDigital,
+                        l.ContadorVistas, l.ContadorDescargas,
                         COUNT(CASE WHEN e.EjemplarID IS NOT NULL AND (e.Estado != 'Baja' OR e.Estado IS NULL) THEN 1 END) as TotalEjemplares,
                         COUNT(CASE WHEN e.Estado = 'Disponible' THEN 1 END) as EjemplaresDisponibles,
                         COUNT(CASE WHEN e.Estado = 'Prestado' THEN 1 END) as EjemplaresPrestados
@@ -42,7 +44,8 @@ namespace NeoLibroAPI.Data
                     LEFT JOIN Ejemplares e ON l.LibroID = e.LibroID AND (e.Estado != 'Baja' OR e.Estado IS NULL)
                     GROUP BY l.LibroID, l.ISBN, l.Titulo, l.Editorial, l.AnioPublicacion,
                              l.Idioma, l.Paginas, l.LCCSeccion, l.LCCSeccion, l.LCCNumero,
-                             l.LCCCutter, l.SignaturaLCC
+                             l.LCCCutter, l.SignaturaLCC, l.RutaArchivoDigital, l.TipoArchivoDigital,
+                             l.TamañoArchivoDigital, l.ContadorVistas, l.ContadorDescargas
                     ORDER BY l.Titulo", cn);
                 cn.Open();
 
@@ -65,7 +68,13 @@ namespace NeoLibroAPI.Data
                             SignaturaLCC = dr["SignaturaLCC"]?.ToString(),
                             TotalEjemplares = dr["TotalEjemplares"] == DBNull.Value ? 0 : Convert.ToInt32(dr["TotalEjemplares"]),
                             EjemplaresDisponibles = dr["EjemplaresDisponibles"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresDisponibles"]),
-                            EjemplaresPrestados = dr["EjemplaresPrestados"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresPrestados"])
+                            EjemplaresPrestados = dr["EjemplaresPrestados"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresPrestados"]),
+                            // Campos de archivo digital (HU-10)
+                            TieneArchivoDigital = dr["RutaArchivoDigital"] != DBNull.Value && !string.IsNullOrEmpty(dr["RutaArchivoDigital"]?.ToString()),
+                            TipoArchivoDigital = dr["TipoArchivoDigital"]?.ToString(),
+                            TamañoArchivoDigital = dr["TamañoArchivoDigital"] != DBNull.Value ? Convert.ToInt64(dr["TamañoArchivoDigital"]) : null,
+                            ContadorVistas = dr["ContadorVistas"] != DBNull.Value ? Convert.ToInt32(dr["ContadorVistas"]) : 0,
+                            ContadorDescargas = dr["ContadorDescargas"] != DBNull.Value ? Convert.ToInt32(dr["ContadorDescargas"]) : 0
                         };
 
                         // Obtener autores
@@ -91,6 +100,8 @@ namespace NeoLibroAPI.Data
                         l.LibroID, l.ISBN, l.Titulo, l.Editorial, l.AnioPublicacion,
                         l.Idioma, l.Paginas, l.LCCSeccion, l.LCCSeccion, l.LCCNumero,
                         l.LCCCutter, l.SignaturaLCC,
+                        l.RutaArchivoDigital, l.TipoArchivoDigital, l.TamañoArchivoDigital,
+                        l.ContadorVistas, l.ContadorDescargas,
                         COUNT(CASE WHEN e.EjemplarID IS NOT NULL AND (e.Estado != 'Baja' OR e.Estado IS NULL) THEN 1 END) as TotalEjemplares,
                         COUNT(CASE WHEN e.Estado = 'Disponible' THEN 1 END) as EjemplaresDisponibles,
                         COUNT(CASE WHEN e.Estado = 'Prestado' THEN 1 END) as EjemplaresPrestados
@@ -99,7 +110,8 @@ namespace NeoLibroAPI.Data
                     WHERE l.LibroID = @LibroID
                     GROUP BY l.LibroID, l.ISBN, l.Titulo, l.Editorial, l.AnioPublicacion,
                              l.Idioma, l.Paginas, l.LCCSeccion, l.LCCSeccion, l.LCCNumero,
-                             l.LCCCutter, l.SignaturaLCC", cn);
+                             l.LCCCutter, l.SignaturaLCC, l.RutaArchivoDigital, l.TipoArchivoDigital,
+                             l.TamañoArchivoDigital, l.ContadorVistas, l.ContadorDescargas", cn);
                 cmd.Parameters.AddWithValue("@LibroID", id);
                 cn.Open();
 
@@ -122,7 +134,13 @@ namespace NeoLibroAPI.Data
                             SignaturaLCC = dr["SignaturaLCC"]?.ToString(),
                             TotalEjemplares = dr["TotalEjemplares"] == DBNull.Value ? 0 : Convert.ToInt32(dr["TotalEjemplares"]),
                             EjemplaresDisponibles = dr["EjemplaresDisponibles"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresDisponibles"]),
-                            EjemplaresPrestados = dr["EjemplaresPrestados"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresPrestados"])
+                            EjemplaresPrestados = dr["EjemplaresPrestados"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresPrestados"]),
+                            // Campos de archivo digital (HU-10)
+                            TieneArchivoDigital = dr["RutaArchivoDigital"] != DBNull.Value && !string.IsNullOrEmpty(dr["RutaArchivoDigital"]?.ToString()),
+                            TipoArchivoDigital = dr["TipoArchivoDigital"]?.ToString(),
+                            TamañoArchivoDigital = dr["TamañoArchivoDigital"] != DBNull.Value ? Convert.ToInt64(dr["TamañoArchivoDigital"]) : null,
+                            ContadorVistas = dr["ContadorVistas"] != DBNull.Value ? Convert.ToInt32(dr["ContadorVistas"]) : 0,
+                            ContadorDescargas = dr["ContadorDescargas"] != DBNull.Value ? Convert.ToInt32(dr["ContadorDescargas"]) : 0
                         };
 
                         // Obtener autores y categorías
@@ -274,7 +292,7 @@ namespace NeoLibroAPI.Data
             }
         }
 
-        public List<LibroDTO> Buscar(string? autor, string? titulo)
+        public List<LibroDTO> Buscar(string? autor, string? titulo, string? palabraClave)
         {
             var lista = new List<LibroDTO>();
 
@@ -298,11 +316,29 @@ namespace NeoLibroAPI.Data
                     parameters.Add(new SqlParameter("@Autor", $"%{autor}%"));
                 }
 
+                // Búsqueda por palabra clave (en título, editorial, ISBN, categorías)
+                if (!string.IsNullOrEmpty(palabraClave))
+                {
+                    whereClause += @" AND (
+                        l.Titulo LIKE @PalabraClave 
+                        OR l.Editorial LIKE @PalabraClave 
+                        OR l.ISBN LIKE @PalabraClave
+                        OR EXISTS (
+                            SELECT 1 FROM LibroCategorias lc 
+                            INNER JOIN Categorias c ON lc.CategoriaID = c.CategoriaID 
+                            WHERE lc.LibroID = l.LibroID AND c.Nombre LIKE @PalabraClave
+                        )
+                    )";
+                    parameters.Add(new SqlParameter("@PalabraClave", $"%{palabraClave}%"));
+                }
+
                 SqlCommand cmd = new SqlCommand($@"
                     SELECT 
                         l.LibroID, l.ISBN, l.Titulo, l.Editorial, l.AnioPublicacion,
                         l.Idioma, l.Paginas, l.LCCSeccion, l.LCCSeccion, l.LCCNumero,
                         l.LCCCutter, l.SignaturaLCC,
+                        l.RutaArchivoDigital, l.TipoArchivoDigital, l.TamañoArchivoDigital,
+                        l.ContadorVistas, l.ContadorDescargas,
                         COUNT(CASE WHEN e.EjemplarID IS NOT NULL AND (e.Estado != 'Baja' OR e.Estado IS NULL) THEN 1 END) as TotalEjemplares,
                         COUNT(CASE WHEN e.Estado = 'Disponible' THEN 1 END) as EjemplaresDisponibles,
                         COUNT(CASE WHEN e.Estado = 'Prestado' THEN 1 END) as EjemplaresPrestados
@@ -311,7 +347,8 @@ namespace NeoLibroAPI.Data
                     {whereClause}
                     GROUP BY l.LibroID, l.ISBN, l.Titulo, l.Editorial, l.AnioPublicacion,
                              l.Idioma, l.Paginas, l.LCCSeccion, l.LCCSeccion, l.LCCNumero,
-                             l.LCCCutter, l.SignaturaLCC
+                             l.LCCCutter, l.SignaturaLCC, l.RutaArchivoDigital, l.TipoArchivoDigital,
+                             l.TamañoArchivoDigital, l.ContadorVistas, l.ContadorDescargas
                     ORDER BY l.Titulo", cn);
 
                 cmd.Parameters.AddRange(parameters.ToArray());
@@ -336,7 +373,13 @@ namespace NeoLibroAPI.Data
                             SignaturaLCC = dr["SignaturaLCC"]?.ToString(),
                             TotalEjemplares = dr["TotalEjemplares"] == DBNull.Value ? 0 : Convert.ToInt32(dr["TotalEjemplares"]),
                             EjemplaresDisponibles = dr["EjemplaresDisponibles"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresDisponibles"]),
-                            EjemplaresPrestados = dr["EjemplaresPrestados"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresPrestados"])
+                            EjemplaresPrestados = dr["EjemplaresPrestados"] == DBNull.Value ? 0 : Convert.ToInt32(dr["EjemplaresPrestados"]),
+                            // Campos de archivo digital (HU-10)
+                            TieneArchivoDigital = dr["RutaArchivoDigital"] != DBNull.Value && !string.IsNullOrEmpty(dr["RutaArchivoDigital"]?.ToString()),
+                            TipoArchivoDigital = dr["TipoArchivoDigital"]?.ToString(),
+                            TamañoArchivoDigital = dr["TamañoArchivoDigital"] != DBNull.Value ? Convert.ToInt64(dr["TamañoArchivoDigital"]) : null,
+                            ContadorVistas = dr["ContadorVistas"] != DBNull.Value ? Convert.ToInt32(dr["ContadorVistas"]) : 0,
+                            ContadorDescargas = dr["ContadorDescargas"] != DBNull.Value ? Convert.ToInt32(dr["ContadorDescargas"]) : 0
                         };
 
                         libro.Autores = ObtenerAutoresPorLibro(libro.LibroID);
@@ -429,6 +472,117 @@ namespace NeoLibroAPI.Data
             SqlCommand cmd2 = new SqlCommand("DELETE FROM LibroCategorias WHERE LibroID = @LibroID", cn, transaction);
             cmd2.Parameters.AddWithValue("@LibroID", libroId);
             cmd2.ExecuteNonQuery();
+        }
+
+        // Métodos para archivos digitales (HU-10)
+
+        public bool ActualizarArchivoDigital(int libroID, string rutaArchivo, string tipoArchivo, long tamañoArchivo)
+        {
+            using (SqlConnection cn = GetConnection())
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    UPDATE Libros 
+                    SET RutaArchivoDigital = @RutaArchivo,
+                        TipoArchivoDigital = @TipoArchivo,
+                        TamañoArchivoDigital = @TamañoArchivo,
+                        FechaSubidaDigital = GETDATE()
+                    WHERE LibroID = @LibroID", cn);
+                
+                cmd.Parameters.AddWithValue("@LibroID", libroID);
+                cmd.Parameters.AddWithValue("@RutaArchivo", rutaArchivo);
+                cmd.Parameters.AddWithValue("@TipoArchivo", tipoArchivo);
+                cmd.Parameters.AddWithValue("@TamañoArchivo", tamañoArchivo);
+                
+                cn.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        public bool EliminarArchivoDigital(int libroID)
+        {
+            using (SqlConnection cn = GetConnection())
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    UPDATE Libros 
+                    SET RutaArchivoDigital = NULL,
+                        TipoArchivoDigital = NULL,
+                        TamañoArchivoDigital = NULL,
+                        FechaSubidaDigital = NULL
+                    WHERE LibroID = @LibroID", cn);
+                
+                cmd.Parameters.AddWithValue("@LibroID", libroID);
+                
+                cn.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        public bool RegistrarLogAcceso(int libroID, int usuarioID, string tipoAcceso, string? ipAcceso, string? userAgent)
+        {
+            using (SqlConnection cn = GetConnection())
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    INSERT INTO LogsAccesoDigital (LibroID, UsuarioID, TipoAcceso, IPAcceso, UserAgent)
+                    VALUES (@LibroID, @UsuarioID, @TipoAcceso, @IPAcceso, @UserAgent)", cn);
+                
+                cmd.Parameters.AddWithValue("@LibroID", libroID);
+                cmd.Parameters.AddWithValue("@UsuarioID", usuarioID);
+                cmd.Parameters.AddWithValue("@TipoAcceso", tipoAcceso);
+                cmd.Parameters.AddWithValue("@IPAcceso", (object?)ipAcceso ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@UserAgent", (object?)userAgent ?? DBNull.Value);
+                
+                cn.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        public bool IncrementarContadorVistas(int libroID)
+        {
+            using (SqlConnection cn = GetConnection())
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    UPDATE Libros 
+                    SET ContadorVistas = ContadorVistas + 1
+                    WHERE LibroID = @LibroID", cn);
+                
+                cmd.Parameters.AddWithValue("@LibroID", libroID);
+                
+                cn.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        public bool IncrementarContadorDescargas(int libroID)
+        {
+            using (SqlConnection cn = GetConnection())
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    UPDATE Libros 
+                    SET ContadorDescargas = ContadorDescargas + 1
+                    WHERE LibroID = @LibroID", cn);
+                
+                cmd.Parameters.AddWithValue("@LibroID", libroID);
+                
+                cn.Open();
+                return cmd.ExecuteNonQuery() > 0;
+            }
+        }
+
+        public string? ObtenerRutaArchivoDigital(int libroID)
+        {
+            using (SqlConnection cn = GetConnection())
+            {
+                SqlCommand cmd = new SqlCommand(@"
+                    SELECT RutaArchivoDigital 
+                    FROM Libros 
+                    WHERE LibroID = @LibroID AND RutaArchivoDigital IS NOT NULL", cn);
+                
+                cmd.Parameters.AddWithValue("@LibroID", libroID);
+                
+                cn.Open();
+                var result = cmd.ExecuteScalar();
+                return result?.ToString();
+            }
         }
     }
 }

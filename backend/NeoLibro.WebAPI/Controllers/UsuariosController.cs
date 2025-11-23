@@ -7,6 +7,7 @@ using NeoLibroAPI.Models.Requests;
 using NeoLibroAPI.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using System;
+using System.Linq;
 
 namespace NeoLibroAPI.Controllers
 {
@@ -163,7 +164,12 @@ namespace NeoLibroAPI.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
+            // Cerrar sesión y eliminar la cookie
             await HttpContext.SignOutAsync("MiCookieAuth");
+            
+            // Eliminar explícitamente la cookie para asegurar que se borre
+            Response.Cookies.Delete("NeoLibro.Auth");
+            
             return Ok(new { mensaje = "Sesión cerrada correctamente" });
         }
 
@@ -298,9 +304,28 @@ namespace NeoLibroAPI.Controllers
                     return BadRequest(new { mensaje = "El email institucional ya está en uso por otro usuario." });
             }
 
+            // Validar que el código universitario no esté en uso por otro usuario (si se proporciona)
+            if (!string.IsNullOrWhiteSpace(request.CodigoUniversitario) && 
+                request.CodigoUniversitario != usuario.CodigoUniversitario)
+            {
+                // Verificar si el código ya está en uso por otro usuario
+                var usuariosConMismoCodigo = _usuarioBusiness.Listar()
+                    .Where(u => u.CodigoUniversitario == request.CodigoUniversitario && u.UsuarioID != id)
+                    .ToList();
+                
+                if (usuariosConMismoCodigo.Any())
+                    return BadRequest(new { mensaje = "El código universitario ya está en uso por otro usuario." });
+            }
+
             // Actualizar datos
             usuario.Nombre = request.Nombre;
             usuario.EmailInstitucional = request.EmailInstitucional;
+            
+            // Actualizar código universitario (puede ser vacío para usuarios SSO)
+            if (request.CodigoUniversitario != null)
+            {
+                usuario.CodigoUniversitario = request.CodigoUniversitario;
+            }
 
             var resultado = _usuarioBusiness.Modificar(usuario);
             return resultado
@@ -433,20 +458,23 @@ namespace NeoLibroAPI.Controllers
                 }
 
                 // Ordenar
-                switch (ordenarPor.ToLower())
+                var ordenarPorValue = ordenarPor ?? "nombre";
+                var ordenValue = orden ?? "asc";
+                
+                switch (ordenarPorValue.ToLower())
                 {
                     case "nombre":
-                        usuarios = orden.ToLower() == "desc" 
+                        usuarios = ordenValue.ToLower() == "desc" 
                             ? usuarios.OrderByDescending(u => u.Nombre)
                             : usuarios.OrderBy(u => u.Nombre);
                         break;
                     case "email":
-                        usuarios = orden.ToLower() == "desc" 
+                        usuarios = ordenValue.ToLower() == "desc" 
                             ? usuarios.OrderByDescending(u => u.EmailInstitucional)
                             : usuarios.OrderBy(u => u.EmailInstitucional);
                         break;
                     case "fecharegistro":
-                        usuarios = orden.ToLower() == "desc" 
+                        usuarios = ordenValue.ToLower() == "desc" 
                             ? usuarios.OrderByDescending(u => u.FechaRegistro)
                             : usuarios.OrderBy(u => u.FechaRegistro);
                         break;

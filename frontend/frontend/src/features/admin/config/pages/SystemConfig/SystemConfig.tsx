@@ -9,6 +9,7 @@ import {
     validarConfiguracion,
     type ConfiguracionCompleta
 } from '../../../../../api/configuracion';
+import { useConfiguracion } from '../../../../../contexts/ConfiguracionContext';
 import { 
     Settings, 
     Save, 
@@ -19,7 +20,8 @@ import {
     BookOpen,
     AlertTriangle,
     CheckCircle,
-    BarChart3
+    BarChart3,
+    Globe
 } from 'lucide-react';
 import './SystemConfig.css';
 
@@ -34,6 +36,7 @@ const SystemConfig: React.FC = () => {
     });
     
     const { goBack } = useNavigation();
+    const { actualizarConfiguracion: actualizarContexto } = useConfiguracion();
     const [configuracion, setConfiguracion] = useState<ConfiguracionCompleta | null>(null);
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
@@ -60,6 +63,16 @@ const SystemConfig: React.FC = () => {
                     topNLibros: 10,
                     topNUsuarios: 10,
                     añoPorDefecto: new Date().getFullYear()
+                };
+            }
+            
+            // Asegurar que la sección de interfaz existe (para compatibilidad con configuraciones antiguas)
+            if (!configuracionReal.interfaz) {
+                configuracionReal.interfaz = {
+                    tema: 'oscuro',
+                    elementosPorPagina: 20,
+                    mostrarImagenes: true,
+                    animaciones: true
                 };
             }
             
@@ -90,6 +103,9 @@ const SystemConfig: React.FC = () => {
             
             // Guardar configuración en el backend
             await actualizarConfiguracion(configuracion);
+            
+            // Actualizar el contexto de configuración para aplicar cambios inmediatamente
+            await actualizarContexto();
             
             setExito('Configuración guardada exitosamente');
             console.log('Configuración guardada:', configuracion);
@@ -186,6 +202,16 @@ const SystemConfig: React.FC = () => {
         };
     }
 
+    // Asegurar que la sección de interfaz existe antes de renderizar
+    if (!configuracion.interfaz) {
+        configuracion.interfaz = {
+            tema: 'oscuro',
+            elementosPorPagina: 20,
+            mostrarImagenes: true,
+            animaciones: true
+        };
+    }
+
     const secciones = [
         { id: 'general', nombre: 'General', icono: Settings },
         { id: 'prestamos', nombre: 'Préstamos', icono: BookOpen },
@@ -193,7 +219,8 @@ const SystemConfig: React.FC = () => {
         { id: 'notificaciones', nombre: 'Notificaciones', icono: Bell },
         { id: 'seguridad', nombre: 'Seguridad', icono: Shield },
         { id: 'respaldo', nombre: 'Respaldo', icono: Database },
-        { id: 'reportes', nombre: 'Reportes', icono: BarChart3 }
+        { id: 'reportes', nombre: 'Reportes', icono: BarChart3 },
+        { id: 'interfaz', nombre: 'Interfaz', icono: Globe }
     ];
 
     return (
@@ -790,6 +817,67 @@ const SystemConfig: React.FC = () => {
                                                 max={new Date().getFullYear() + 1}
                                             />
                                             <span className="input-hint">Año por defecto para reportes mensuales de préstamos</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Sección Interfaz */}
+                            {seccionActiva === 'interfaz' && (
+                                <div className="section-content">
+                                    <div className="section-header">
+                                        <Globe size={24} />
+                                        <h2>Configuración de Interfaz</h2>
+                                    </div>
+                                    
+                                    <div className="form-grid">
+                                        <div className="form-group">
+                                            <label htmlFor="tema">Tema</label>
+                                            <select
+                                                id="tema"
+                                                value={configuracion.interfaz.tema}
+                                                onChange={(e) => manejarCambio('interfaz', 'tema', e.target.value)}
+                                            >
+                                                <option value="claro">Claro</option>
+                                                <option value="oscuro">Oscuro</option>
+                                                <option value="auto">Automático</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label htmlFor="elementosPorPagina">Elementos por Página</label>
+                                            <input
+                                                type="number"
+                                                id="elementosPorPagina"
+                                                value={configuracion.interfaz.elementosPorPagina}
+                                                onChange={(e) => manejarCambio('interfaz', 'elementosPorPagina', parseInt(e.target.value))}
+                                                min="5"
+                                                max="100"
+                                            />
+                                        </div>
+
+                                        <div className="form-group checkbox-group">
+                                            <label className="checkbox-label">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={configuracion.interfaz.mostrarImagenes}
+                                                    onChange={(e) => manejarCambio('interfaz', 'mostrarImagenes', e.target.checked)}
+                                                />
+                                                <span className="checkmark"></span>
+                                                Mostrar Imágenes
+                                            </label>
+                                        </div>
+
+                                        <div className="form-group checkbox-group">
+                                            <label className="checkbox-label">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={configuracion.interfaz.animaciones}
+                                                    onChange={(e) => manejarCambio('interfaz', 'animaciones', e.target.checked)}
+                                                />
+                                                <span className="checkmark"></span>
+                                                Habilitar Animaciones
+                                            </label>
                                         </div>
                                     </div>
                                 </div>

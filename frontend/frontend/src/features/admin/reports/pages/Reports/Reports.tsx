@@ -20,6 +20,7 @@ import {
     type RendimientoBiblioteca
 } from '../../../../../api/reportes';
 import { obtenerConfiguracion } from '../../../../../api/configuracion';
+import { generarMultasAutomaticas } from '../../../../../api/multas';
 import { 
     BarChart3, 
     Users, 
@@ -108,6 +109,15 @@ const Reports: React.FC = () => {
         try {
             setCargando(true);
             setError(null);
+            
+            // Generar multas automáticamente antes de cargar los datos
+            try {
+                await generarMultasAutomaticas();
+                console.log('Multas generadas automáticamente');
+            } catch (error) {
+                console.warn('Error al generar multas automáticamente (no crítico):', error);
+                // No bloquear la carga de datos si falla la generación de multas
+            }
             
             // Usar valores de configuración o valores por defecto
             const periodo = config?.periodoPorDefecto ?? 6;
@@ -205,7 +215,7 @@ const Reports: React.FC = () => {
                 <div className="error-state">
                     <h2>Error al cargar reportes</h2>
                     <p>{error}</p>
-                    <button onClick={cargarDatos} className="btn-primary">
+                    <button onClick={() => cargarDatos(configuracionReportes || undefined)} className="btn-primary">
                         <RefreshCw size={20} />
                         Reintentar
                     </button>
@@ -254,7 +264,7 @@ const Reports: React.FC = () => {
                         </button>
                         <button 
                             className="btn-refresh"
-                            onClick={cargarDatos}
+                            onClick={() => cargarDatos(configuracionReportes || undefined)}
                         >
                             <RefreshCw size={20} />
                             Actualizar

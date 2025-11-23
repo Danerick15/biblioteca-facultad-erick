@@ -346,6 +346,8 @@ namespace NeoLibroAPI.Data
             var query = from r in _context.Reservas
                        join u in _context.Usuarios on r.UsuarioID equals u.UsuarioID
                        join l in _context.Libros on r.LibroID equals l.LibroID
+                       join e in _context.Ejemplares on r.EjemplarID equals e.EjemplarID into ejemplarJoin
+                       from e in ejemplarJoin.DefaultIfEmpty()
                        where (r.TipoReserva == "Retiro" 
                              || r.Estado == NeoLibroAPI.Models.ReservaEstados.PorAprobar
                              || r.Estado == NeoLibroAPI.Models.ReservaEstados.Aprobada)
@@ -365,7 +367,9 @@ namespace NeoLibroAPI.Data
                            LibroTitulo = l.Titulo,
                            NombreUsuario = u.Nombre,
                            UsuarioNombre = u.Nombre,
-                           CodigoUsuario = u.CodigoUniversitario
+                           CodigoUsuario = u.CodigoUniversitario,
+                           NumeroEjemplar = e != null ? e.NumeroEjemplar : null,
+                           CodigoBarras = e != null ? e.CodigoBarras : null
                        };
 
             return await query.ToListAsync();
@@ -378,6 +382,8 @@ namespace NeoLibroAPI.Data
             var query = from r in _context.Reservas
                        join u in _context.Usuarios on r.UsuarioID equals u.UsuarioID
                        join l in _context.Libros on r.LibroID equals l.LibroID
+                       join e in _context.Ejemplares on r.EjemplarID equals e.EjemplarID into ejemplarJoin
+                       from e in ejemplarJoin.DefaultIfEmpty()
                        where r.Estado == NeoLibroAPI.Models.ReservaEstados.ColaEspera 
                              && r.TipoReserva == "ColaEspera"
                        orderby r.LibroID, r.PrioridadCola ?? int.MaxValue
@@ -393,7 +399,9 @@ namespace NeoLibroAPI.Data
                            NombreUsuario = u.Nombre,
                            UsuarioNombre = u.Nombre,
                            CodigoUsuario = u.CodigoUniversitario,
-                           PosicionCola = r.PrioridadCola
+                           PosicionCola = r.PrioridadCola,
+                           NumeroEjemplar = e != null ? e.NumeroEjemplar : null,
+                           CodigoBarras = e != null ? e.CodigoBarras : null
                        };
 
             return await query.ToListAsync();

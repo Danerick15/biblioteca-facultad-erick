@@ -57,3 +57,8 @@ export const obtenerMiResumenMultas = async (): Promise<ResumenMultasDTO> => {
     const res = await axios.get(`${API_URL}/mi-resumen-multas`);
     return res.data;
 };
+
+export const generarMultasAutomaticas = async (): Promise<{ mensaje: string; multasGeneradas: number }> => {
+    const res = await axios.post(`${API_URL}/generar-automaticas`);
+    return res.data;
+};

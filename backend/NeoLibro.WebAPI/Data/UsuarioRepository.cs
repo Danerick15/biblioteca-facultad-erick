@@ -253,17 +253,40 @@ namespace NeoLibroAPI.Data
             {
                 using (SqlConnection cn = GetConnection())
                 {
+                    cn.Open();
+                    
+                    // Corregir automáticamente multas pendientes de préstamos ya devueltos
+                    using (var cmdCorregir = new SqlCommand(@"
+                        UPDATE Multas 
+                        SET Estado = 'Pagada', FechaCobro = GETDATE()
+                        WHERE Estado = 'Pendiente'
+                        AND PrestamoID IN (
+                            SELECT PrestamoID 
+                            FROM Prestamos 
+                            WHERE Estado = 'Devuelto'
+                        )", cn))
+                    {
+                        cmdCorregir.ExecuteNonQuery();
+                    }
+
                     SqlCommand cmd = new SqlCommand(@"
                         SELECT 
-                            (SELECT COUNT(*) FROM Prestamos WHERE UsuarioID = @UsuarioID) as TotalPrestamos,
-                            (SELECT COUNT(*) FROM Prestamos WHERE UsuarioID = @UsuarioID AND Estado = 'Prestado') as PrestamosActivos,
-                            (SELECT COUNT(*) FROM Prestamos WHERE UsuarioID = @UsuarioID AND Estado = 'Devuelto') as PrestamosCompletados,
+                            (SELECT COUNT(*) FROM Prestamos p 
+                             INNER JOIN Reservas r ON p.ReservaID = r.ReservaID 
+                             WHERE r.UsuarioID = @UsuarioID) as TotalPrestamos,
+                            (SELECT COUNT(*) FROM Prestamos p 
+                             INNER JOIN Reservas r ON p.ReservaID = r.ReservaID 
+                             WHERE r.UsuarioID = @UsuarioID AND p.Estado = 'Prestado') as PrestamosActivos,
+                            (SELECT COUNT(*) FROM Prestamos p 
+                             INNER JOIN Reservas r ON p.ReservaID = r.ReservaID 
+                             WHERE r.UsuarioID = @UsuarioID 
+                             AND p.Estado = 'Devuelto' 
+                             AND p.FechaDevolucion IS NOT NULL
+                             AND YEAR(p.FechaDevolucion) = YEAR(GETDATE())) as PrestamosCompletados,
                             (SELECT COUNT(*) FROM Multas WHERE UsuarioID = @UsuarioID) as TotalMultas,
                             (SELECT COUNT(*) FROM Multas WHERE UsuarioID = @UsuarioID AND Estado = 'Pendiente') as MultasPendientes,
                             (SELECT ISNULL(SUM(Monto), 0) FROM Multas WHERE UsuarioID = @UsuarioID AND Estado = 'Pendiente') as MontoMultasPendientes", cn);
                     cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
-
-                    cn.Open();
 
                     using (SqlDataReader dr = cmd.ExecuteReader())
                     {

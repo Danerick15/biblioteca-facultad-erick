@@ -68,5 +68,17 @@ namespace NeoLibroAPI.Interfaces
         /// <param name="usuarioId">ID del usuario</param>
         /// <returns>True si tiene multas pendientes, False si no</returns>
         bool TieneMultasPendientes(int usuarioId);
+
+        /// <summary>
+        /// Genera multas automáticamente para préstamos vencidos que aún no tienen multa
+        /// </summary>
+        /// <returns>Número de multas generadas</returns>
+        int GenerarMultasAutomaticas();
+
+        /// <summary>
+        /// Marca como pagadas todas las multas pendientes de préstamos que ya fueron devueltos
+        /// </summary>
+        /// <returns>Número de multas actualizadas</returns>
+        int CorregirMultasPrestamosDevueltos();
     }
 }

@@ -196,8 +196,9 @@ const Perfil: React.FC<PerfilProps> = ({ usuario }) => {
     const handleGuardarPerfil = async () => {
         try {
             const request: ActualizarPerfilRequest = {
-                    nombre: formData.nombre,
-                emailInstitucional: formData.emailInstitucional
+                nombre: formData.nombre,
+                emailInstitucional: formData.emailInstitucional,
+                codigoUniversitario: formData.codigoUniversitario.trim() || undefined
             };
 
             await actualizarMiPerfil(request);
@@ -447,12 +448,13 @@ const Perfil: React.FC<PerfilProps> = ({ usuario }) => {
                                             {editando ? (
                                                 <input
                                                     type="text"
+                                                    placeholder="Ingresa tu código universitario (ej: 22200196)"
                                                     value={formData.codigoUniversitario}
                                                     onChange={(e) => setFormData({...formData, codigoUniversitario: e.target.value})}
                                                     className="edit-input"
                                                 />
                                             ) : (
-                                                <span>{perfilCompleto?.codigoUniversitario || 'Cargando...'}</span>
+                                                <span>{perfilCompleto?.codigoUniversitario || 'No registrado - Haz clic en Editar para agregarlo'}</span>
                                             )}
                                         </div>
 

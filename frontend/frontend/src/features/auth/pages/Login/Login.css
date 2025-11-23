@@ -8,18 +8,6 @@ body {
 }
 
 :root {
-<<<<<<< Updated upstream
-    --bg-1: linear-gradient(135deg,#0a2342 0%, #07192f 40%, #04101f 100%);
-    --accent: #f0d77b;
-    --accent-2: #f0d77b;
-    --glass: rgba(255,255,255,0.04);
-    --glass-2: rgba(255,255,255,0.04);
-    --muted: rgba(255,255,255,0.85);
-    --card-radius: 18px;
-    --shadow: 0 12px 34px rgba(0,0,0,0.7);
-    --glass-border: rgba(255,255,255,0.1);
-    --max-width: 980px;
-=======
     --bg-1: linear-gradient(180deg,#f8fafc 0%, #eef3fb 100%);
     --accent: #0f6bdc; /* azul institucional */
     --accent-2: #0b57b8;
@@ -34,27 +22,19 @@ body {
     --dark-blue-2: #0b3a57;
     --yellow-glow: #fbbf24;
     --orange-glow: #f59e0b;
->>>>>>> Stashed changes
 }
 
 /* ===== ESTILOS ESPECÍFICOS DE LOGIN (ENCAPSULADOS) ===== */
 .login-page {
     margin: 0;
     min-height: 100vh;
-<<<<<<< Updated upstream
-    background: linear-gradient(135deg, #1a365d 0%, #2d3748 25%, #1a202c 75%, #0f1419 100%);
-=======
     background: transparent; /* transparente para no tapar el video fixed */
->>>>>>> Stashed changes
     display: block;
     padding: 0;
     position: relative;
     font-family: var(--font-family-primary);
-<<<<<<< Updated upstream
-=======
     overflow: hidden;
     color: var(--dark-blue);
->>>>>>> Stashed changes
 }
 
 /* (Se removió el indicador de diagnóstico del video) */
@@ -65,36 +45,25 @@ body {
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    filter: blur(45px) saturate(120%);
+    filter: blur(100px) saturate(120%);
+    overflow: hidden;
 }
 
 .blob {
     position: absolute;
-    width: 480px;
-    height: 480px;
+    width: 300px;
+    height: 300px;
     border-radius: 50%;
-    opacity: .6;
-    animation: float 12s ease-in-out infinite, pulse 8s ease-in-out infinite;
+    opacity: 0.25;
+    animation: float 15s ease-in-out infinite, pulse 10s ease-in-out infinite;
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.2); opacity: 0.8; }
+    0%, 100% { transform: scale(1); opacity: 0.25; }
+    50% { transform: scale(1.1); opacity: 0.35; }
 }
 
 .blob.a {
-<<<<<<< Updated upstream
-    left: -12%;
-    top: -8%;
-    background: radial-gradient(circle at 30% 30%, var(--accent), transparent 50%);
-}
-
-.blob.b {
-    right: -10%;
-    bottom: -10%;
-    background: radial-gradient(circle at 70% 70%, var(--accent-2), transparent 50%);
-    animation-duration: 16s;
-=======
     left: -5%;
     top: -3%;
     background: radial-gradient(circle at 40% 40%, rgba(11,97,220,0.10) 0%, rgba(11,97,220,0.06) 25%, transparent 55%);
@@ -107,7 +76,6 @@ body {
     background: radial-gradient(circle at 60% 60%, rgba(11,97,220,0.08) 0%, rgba(11,97,220,0.04) 25%, transparent 55%);
     animation-duration: 18s;
     box-shadow: 0 0 60px rgba(11,97,220,0.05);
->>>>>>> Stashed changes
 }
 
 @keyframes float {
@@ -120,15 +88,6 @@ body {
     position: relative;
     z-index: 10;
     width: 100%;
-<<<<<<< Updated upstream
-    max-width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 0.8fr;
-    gap: 1rem;
-    align-items: center;
-    backdrop-filter: blur(10px);
-    padding: 2rem 2rem;
-=======
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
@@ -139,7 +98,6 @@ body {
     backdrop-filter: blur(10px);
     padding: 1.5rem;
     padding-top: 2.5rem;
->>>>>>> Stashed changes
     height: 100vh;
     box-sizing: border-box;
 }
@@ -147,31 +105,17 @@ body {
 
 .hero {
     padding: 2.5rem;
-<<<<<<< Updated upstream
-    border-radius: 1.5rem;
-    background: rgba(255,255,255,0.08);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    backdrop-filter: blur(20px);
-=======
     border-radius: 1rem;
     background: transparent;
     box-shadow: none;
     border: none;
     color: var(--dark-blue);
     backdrop-filter: none;
->>>>>>> Stashed changes
     transition: all 0.3s ease;
-    max-width: 500px;
     height: fit-content;
     width: 100%;
-<<<<<<< Updated upstream
-    justify-self: center;
-=======
     position: relative;
     overflow: visible;
->>>>>>> Stashed changes
 }
 
 /* Contenedor de media (video) dentro del hero. El video se coloca detrás del contenido. */
@@ -235,9 +179,9 @@ body {
 .hero-top-box .subtitle { color: var(--muted); margin: 0; }
 
 .hero:hover {
-    background: rgba(255,255,255,0.12);
-    transform: translateY(-3px);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.2);
 }
 
 /* Textos específicos de la sección hero (fondo transparente - texto blanco) */
@@ -254,16 +198,26 @@ body {
 }
 
 .logo {
-    width: 90px;
-    height: 90px;
-    border-radius: 14px;
-    background: linear-gradient(135deg,var(--accent),var(--accent-2));
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    background: #fbbf24;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    color: #0a2342;
-    font-size: 34px;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.logo::before {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 32px;
+    background: #3b82f6;
+    border-radius: 4px;
+    z-index: 1;
 }
 
 .title {
@@ -307,17 +261,6 @@ body {
 }
 
 .login-card {
-<<<<<<< Updated upstream
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    width: 60%;
-    justify-self: center;
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15);
-    border: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(20px);
-    transition: all 0.4s ease;
-=======
     padding: 1.25rem 1.5rem;
     border-radius: 1rem;
     width: 100%;
@@ -327,20 +270,22 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.04) !important;
     backdrop-filter: none !important;
     transition: all 0.25s ease;
->>>>>>> Stashed changes
 }
 
 /* Textos específicos de la sección login-card (fondo blanco - texto oscuro) */
 .login-card p,
 .login-card label {
-    color: #374151;
+    color: #374151 !important;
+}
+
+.login-card h2 {
+    color: #1f2937 !important;
 }
 
 
 .login-card:hover {
-    background: rgba(255,255,255,1);
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+    background: #ffffff !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18) !important;
     transform: translateY(-2px);
 }
 
@@ -362,36 +307,32 @@ form > *:nth-child(4) { animation-delay: 0.4s; }
     }
 }
 .login-card h2 {
-    margin: 0 0 1rem 0;
+    margin: 0 0 0.5rem 0;
     font-size: 1.75rem;
-    color: #1f2937;
+    color: #1f2937 !important;
     font-weight: 700;
-    text-align: center;
+    text-align: left;
     letter-spacing: -0.025em;
 }
 
 .login-card p {
-    margin: 0 0 2rem 0;
-    font-size: 1rem;
-    color: #6b7280;
-    text-align: center;
+    margin: 0 0 1.5rem 0;
+    font-size: 0.95rem;
+    color: #6b7280 !important;
+    text-align: left;
     line-height: 1.5;
 }
 
 form {
     display: flex;
     flex-direction: column;
-<<<<<<< Updated upstream
-    gap: 1.25rem;
-=======
     gap: 1rem;
->>>>>>> Stashed changes
 }
 
 .login-page label {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #374151;
+    color: #374151 !important;
     margin-bottom: 0.5rem;
     display: block;
     font-family: var(--font-family-primary);
@@ -403,33 +344,21 @@ form {
     align-items: center;
     gap: 0.5rem;
     background: #ffffff;
-<<<<<<< Updated upstream
-    padding: 1rem 1.25rem;
-    border-radius: 0.75rem;
-    border: 2px solid #e5e7eb;
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    min-width: 0; /* Permite que el contenedor se reduzca */
-    overflow: hidden; /* Evita desbordamiento */
-=======
     padding: 0.6rem 0.75rem;
     border-radius: 0.6rem;
     border: 1px solid #eef2f7;
     transition: all 0.2s ease;
     min-width: 0;
     overflow: hidden;
->>>>>>> Stashed changes
 }
 
 /* Estilos específicos para el input de email con sufijo */
 .login-input-email {
-    flex-wrap: nowrap;
     position: relative;
 }
 
 .login-input-email input[type="text"] {
-    flex: 1 1 auto;
-    min-width: 0; /* Permite que se reduzca */
+    width: 100%;
     border: none;
     background: transparent;
     outline: none;
@@ -441,17 +370,6 @@ form {
     font-family: var(--font-family-primary);
 }
 
-<<<<<<< Updated upstream
-.login-input-email span {
-    flex: 0 0 auto;
-    color: #9ca3af;
-    pointer-events: none;
-    user-select: none;
-    font-size: 1rem;
-    font-weight: 500;
-    white-space: nowrap;
-    margin-left: 0.25rem;
-=======
 /* Sufijo de dominio fijo (@unmsm.edu.pe) - no editable */
 .login-input-email .email-domain {
     margin-left: 0.75rem;
@@ -463,7 +381,6 @@ form {
     border: 1px solid #eef2ff;
     white-space: nowrap;
     font-size: 0.95rem;
->>>>>>> Stashed changes
 }
 
 /* Estilos para el input de contraseña con botón de mostrar/ocultar */
@@ -503,10 +420,10 @@ form {
 }
 
 .login-input:focus-within {
-    border-color: #3b82f6;
+    border-color: #fbbf24;
     background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 6px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+    outline: none;
 }
 
 .login-page input[type=email], 
@@ -565,9 +482,9 @@ form {
 }
 
 .login-input:focus-within {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: #ffffff;
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
 }
 
 /* ===== BOTÓN MODERNO DE LOGIN ===== */
@@ -592,20 +509,22 @@ form {
 }
 
 .login-page .btn--primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    background: #fbbf24;
+    color: #0f172a;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+    font-weight: 600;
 }
 
 .login-page .btn--primary:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #1e3a8a 100%);
+    background: #fcd34d;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+    color: #0f172a;
 }
 
 .login-page .btn--primary:active {
     transform: translateY(0);
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
 }
 
 .login-page .btn--primary::before {
@@ -642,6 +561,43 @@ form {
     gap: 10px;
     justify-content: center;
     align-items: center;
+}
+
+/* ===== SSO SECTION ===== */
+.sso-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.sso-divider::before,
+.sso-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sso-divider span {
+    padding: 0 1rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.sso-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.sso-note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    margin: 0;
+    opacity: 0.8;
 }
 
 /* Enlaces de autenticación */

@@ -13,11 +13,16 @@ import {
     ArrowUpDown,
     Calendar,
     Hash,
-    AlertCircle
+    AlertCircle,
+    Download,
+    BookMarked,
+    ExternalLink
 } from "lucide-react";
-import { obtenerLibros } from "../../../../api/libros";
+import { obtenerLibros, obtenerUrlVerArchivo, obtenerUrlDescargarArchivo } from "../../../../api/libros";
 import { crearReserva } from "../../../../api/reservas";
 import { obtenerEjemplaresPorLibro, type Ejemplar } from "../../../../api/ejemplares";
+import { obtenerMisMultas, type Multa } from "../../../../api/multas";
+import { obtenerRecomendacionesPublicas, type RecomendacionDTO } from "../../../../api/recomendaciones";
 import type { LibroDTO } from "../../../../api/libros";
 import type { Usuario } from "../../../../contexts/AuthContextTypes";
 
@@ -51,6 +56,7 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
     // Estados
     const [libros, setLibros] = useState<LibroDTO[]>([]);
     const [librosFiltrados, setLibrosFiltrados] = useState<LibroDTO[]>([]);
+    const [recomendaciones, setRecomendaciones] = useState<RecomendacionDTO[]>([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [reservandoId, setReservandoId] = useState<number | null>(null);
@@ -60,6 +66,8 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
     const [mostrarReservaModal, setMostrarReservaModal] = useState(false);
     const [ejemplaresParaReservar, setEjemplaresParaReservar] = useState<Ejemplar[]>([]);
     const [ejemplarParaReservarId, setEjemplarParaReservarId] = useState<number | null>(null);
+    const [multasPendientes, setMultasPendientes] = useState<Multa[]>([]);
+    const [tieneMultasPendientes, setTieneMultasPendientes] = useState(false);
     
     // Paginación
     const [paginaActual, setPaginaActual] = useState(1);
@@ -116,6 +124,10 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
     // ===== EFECTOS =====
     useEffect(() => {
         cargarLibros();
+        cargarRecomendaciones();
+        if (!esAdminOBibliotecaria) {
+            cargarMultasPendientes();
+        }
     }, []);
 
     useEffect(() => {
@@ -141,6 +153,26 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
                 setCargando(false);
             }
         };
+
+    const cargarMultasPendientes = async () => {
+        try {
+            const multas = await obtenerMisMultas();
+            const pendientes = multas.filter(m => m.estado === 'Pendiente');
+            setMultasPendientes(pendientes);
+            setTieneMultasPendientes(pendientes.length > 0);
+        } catch (err) {
+            console.error('Error cargando multas pendientes:', err);
+        }
+    };
+
+    const cargarRecomendaciones = async () => {
+        try {
+            const datos = await obtenerRecomendacionesPublicas();
+            setRecomendaciones(datos);
+        } catch (err) {
+            console.error('Error cargando recomendaciones:', err);
+        }
+    };
 
     const aplicarFiltros = () => {
         let resultado = [...libros];
@@ -392,6 +424,60 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
                 </div>
             </div>
 
+            {/* Sección de Recomendaciones */}
+            {recomendaciones.length > 0 && (
+                <div className="recommendations-section">
+                    <div className="recommendations-header-section">
+                        <BookMarked className="recommendations-icon" />
+                        <h2>Recomendaciones de Profesores</h2>
+                    </div>
+                    <div className="recommendations-grid">
+                        {recomendaciones.slice(0, 6).map(recomendacion => (
+                            <div key={recomendacion.recomendacionID} className="recommendation-card-public">
+                                <div className="recommendation-card-header">
+                                    <span className="recommendation-course">{recomendacion.curso}</span>
+                                    <span className="recommendation-professor">por {recomendacion.nombreProfesor}</span>
+                                </div>
+                                <div className="recommendation-card-content">
+                                    {recomendacion.libroID ? (
+                                        <div className="recommendation-book-info">
+                                            <BookOpen size={18} />
+                                            <div>
+                                                <strong>{recomendacion.tituloLibro}</strong>
+                                                {recomendacion.isbn && (
+                                                    <span className="book-isbn-small">ISBN: {recomendacion.isbn}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ) : recomendacion.urlExterna ? (
+                                        <div className="recommendation-link-info">
+                                            <ExternalLink size={18} />
+                                            <a 
+                                                href={recomendacion.urlExterna} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="recommendation-link"
+                                            >
+                                                Ver recurso externo
+                                            </a>
+                                        </div>
+                                    ) : null}
+                                </div>
+                                <div className="recommendation-card-footer">
+                                    <span className="recommendation-date-small">
+                                        {new Date(recomendacion.fecha).toLocaleDateString('es-ES', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        })}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Filtros */}
             <div className="catalog-filters">
                 <div className="filters-header">
@@ -406,7 +492,7 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
                         <Search className="search-icon" />
                         <input
                             type="text"
-                            placeholder="Buscar por título, autor, categoría..."
+                            placeholder="Buscar por título, autor, palabra clave..."
                             value={filtros.busqueda}
                             onChange={(e) => manejarCambioFiltro('busqueda', e.target.value)}
                         />
@@ -637,6 +723,17 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
                                                 : 'Agotado'
                                             }
                                         </span>
+                                        {libro.tieneArchivoDigital && (
+                                            <span className="status digital" style={{ 
+                                                marginTop: '4px',
+                                                background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                                                color: '#ffffff',
+                                                fontSize: '0.7rem',
+                                                padding: '0.2rem 0.4rem'
+                                            }}>
+                                                📱 Digital
+                                            </span>
+                                        )}
                                     </div>
                                 </td>
                                 <td className="acciones-cell">
@@ -649,15 +746,52 @@ const Catalogo: React.FC<CatalogoProps> = (props) => {
                                             >
                                                 <Eye className="icon" />
                                             </button>
-                                            {!esAdminOBibliotecaria && (
-                                                <button
-                                                    className="btn-compact"
-                                                    onClick={() => abrirReservaModal(libro.libroID)}
-                                                    disabled={reservandoId === libro.libroID}
-                                                    title="Solicitar reserva del libro"
+                                            {libro.tieneArchivoDigital && (
+                                                <a
+                                                    href={obtenerUrlDescargarArchivo(libro.libroID)}
+                                                    download
+                                                    className="btn-icon"
+                                                    title={`Descargar archivo digital${libro.contadorDescargas ? ` (${libro.contadorDescargas} descargas)` : ''}`}
+                                                    style={{ textDecoration: 'none' }}
+                                                    onClick={async () => {
+                                                        // Recargar libros después de un breve delay para actualizar contadores
+                                                        setTimeout(() => {
+                                                            cargarLibros();
+                                                        }, 1000);
+                                                    }}
                                                 >
-                                                    {reservandoId === libro.libroID ? 'Reservando...' : 'Reservar'}
-                                                </button>
+                                                    <Download className="icon" />
+                                                </a>
+                                            )}
+                                            {!esAdminOBibliotecaria && (
+                                                <div style={{ position: 'relative' }}>
+                                                    <button
+                                                        className="btn-compact"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            
+                                                            if (tieneMultasPendientes) {
+                                                                const montoTotal = multasPendientes.reduce((sum, m) => sum + m.monto, 0);
+                                                                alert(`No puedes reservar libros porque tienes ${multasPendientes.length} multa(s) pendiente(s) por un total de S/ ${montoTotal.toFixed(2)}. Por favor, paga tus multas antes de realizar una nueva reserva.`);
+                                                                return;
+                                                            }
+                                                            
+                                                            if (reservandoId === libro.libroID) {
+                                                                return;
+                                                            }
+                                                            
+                                                            abrirReservaModal(libro.libroID);
+                                                        }}
+                                                        disabled={reservandoId === libro.libroID && !tieneMultasPendientes}
+                                                        title={tieneMultasPendientes 
+                                                            ? `No puedes reservar: Tienes ${multasPendientes.length} multa(s) pendiente(s). Por favor, paga tus multas primero.`
+                                                            : "Solicitar reserva del libro"}
+                                                        style={tieneMultasPendientes ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+                                                    >
+                                                        {reservandoId === libro.libroID ? 'Reservando...' : 'Reservar'}
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
                                     </div>

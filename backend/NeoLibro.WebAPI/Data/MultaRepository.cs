@@ -355,5 +355,25 @@ namespace NeoLibroAPI.Data
                 return comando.ExecuteScalar() != null;
             }
         }
+
+        public int CorregirMultasPrestamosDevueltos()
+        {
+            using (var conexion = GetConnection())
+            {
+                conexion.Open();
+                var comando = new SqlCommand(@"
+                    UPDATE Multas 
+                    SET Estado = 'Pagada', FechaCobro = GETDATE()
+                    WHERE Estado = 'Pendiente'
+                    AND PrestamoID IN (
+                        SELECT PrestamoID 
+                        FROM Prestamos 
+                        WHERE Estado = 'Devuelto'
+                    )", conexion);
+
+                var multasActualizadas = comando.ExecuteNonQuery();
+                return multasActualizadas;
+            }
+        }
     }
 }

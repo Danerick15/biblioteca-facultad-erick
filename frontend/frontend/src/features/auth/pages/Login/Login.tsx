@@ -3,8 +3,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from 'react-dom';
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 import "./Login.css";
-import { loginWithEmail } from "../../../../api/auth";
+import { loginWithEmail, loginWithGoogle } from "../../../../api/auth";
 import { useAuth } from "../../../../hooks/useAuth";
 import type { Usuario } from "../../../../contexts/AuthContextTypes";
 
@@ -39,8 +40,6 @@ const Login: React.FC = () => {
         setEmail(value);
     };
 
-<<<<<<< Updated upstream
-=======
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const [videoStatus, setVideoStatus] = useState<'loading'|'loaded'|'error'|'idle'>('idle');
 
@@ -145,7 +144,6 @@ const Login: React.FC = () => {
         }
     };
 
->>>>>>> Stashed changes
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMensaje("");
@@ -260,15 +258,6 @@ const Login: React.FC = () => {
 
             <main className="wrap">
                 <section className="hero animate-fade-in">
-<<<<<<< Updated upstream
-                    <div className="brand">
-                        <div className="logo animate-pop">📘</div>
-                        <div>
-                            <h1 className="title">Biblioteca FISI · UNMSM</h1>
-                            <p className="subtitle">
-                                Accede a tus préstamos y recursos digitales
-                            </p>
-=======
 
                     <div className="hero-top-box">
                         <div className="brand">
@@ -279,7 +268,6 @@ const Login: React.FC = () => {
                                     Accede a tus préstamos y recursos digitales
                                 </p>
                             </div>
->>>>>>> Stashed changes
                         </div>
                     </div>
                     <div className="features">
@@ -300,21 +288,12 @@ const Login: React.FC = () => {
                     <p>Usa tu correo institucional o accede con Google</p>
                     <form onSubmit={handleSubmit}>
                         <div>
-<<<<<<< Updated upstream
-                            <label htmlFor="email">Email Institucional</label>
-                            <div className="login-input login-input-email">
-                                <input
-                                    type="text"
-                                    id="email"
-                                    placeholder="tu"
-=======
                             <label htmlFor="email">Correo institucional</label>
                             <div className="login-input login-input-email" aria-hidden={false}>
                                 <input
                                     type="text"
                                     id="email"
                                     placeholder="nombre.apellido"
->>>>>>> Stashed changes
                                     required
                                     value={email}
                                     onChange={handleEmailChange}
@@ -324,13 +303,7 @@ const Login: React.FC = () => {
                                         WebkitTextFillColor: '#1f2937'
                                     }}
                                 />
-<<<<<<< Updated upstream
-                                <span>
-                                    @unmsm.edu.pe
-                                </span>
-=======
                                 <span className="email-domain">@unmsm.edu.pe</span>
->>>>>>> Stashed changes
                             </div>
                             
                         </div>
@@ -365,6 +338,30 @@ const Login: React.FC = () => {
                         </button>
 
                     </form>
+
+                    <div className="sso-divider">
+                        <span>o</span>
+                    </div>
+
+                    <div className="sso-section">
+                        <GoogleLogin
+                            onSuccess={handleGoogleLogin}
+                            onError={() => {
+                                setTituloError("Error de Autenticación");
+                                setMensaje("No se pudo completar la autenticación con Google.");
+                                setTipoMensaje("error");
+                                setMostrarModalMensaje(true);
+                            }}
+                            useOneTap={false}
+                            theme="filled_blue"
+                            size="large"
+                            text="signin_with"
+                            shape="rectangular"
+                        />
+                        <p className="sso-note">
+                            Ingresa con tu cuenta institucional de Google (@unmsm.edu.pe)
+                        </p>
+                    </div>
 
                     <div className="auth-links">
                         <p>¿No tienes cuenta?</p>

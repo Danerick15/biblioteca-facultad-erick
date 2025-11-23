@@ -27,6 +27,28 @@ export const logout = async () => {
     return res.data;
 };
 
+// ===== SSO (Single Sign-On) =====
+
+export interface GoogleLoginRequest {
+    idToken: string;
+    email: string;
+    name?: string;
+    googleId?: string;
+}
+
+export const loginWithGoogle = async (request: GoogleLoginRequest) => {
+    const res = await axios.post(
+        "/Auth/sso/google",
+        {
+            IdToken: request.idToken,
+            Email: request.email,
+            Name: request.name,
+            GoogleId: request.googleId
+        }
+    );
+    return res.data;
+};
+
 export const registrarUsuario = async (datosRegistro: {
     codigoUniversitario: string;
     nombre: string;
@@ -71,6 +93,7 @@ export interface PerfilUsuarioDTO {
 export interface ActualizarPerfilRequest {
     nombre: string;
     emailInstitucional: string;
+    codigoUniversitario?: string;
 }
 
 export interface CambiarContrasenaRequest {

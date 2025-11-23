@@ -37,10 +37,10 @@ namespace NeoLibroAPI.Models.Entities
         public int? PrioridadCola { get; set; } = 1;
 
         [ForeignKey("LibroID")]
-        public virtual Libro Libro { get; set; }
+        public virtual Libro? Libro { get; set; }
 
         [ForeignKey("UsuarioID")]
-        public virtual Usuario Usuario { get; set; }
+        public virtual Usuario? Usuario { get; set; }
 
         [ForeignKey("EjemplarID")]
         public virtual Ejemplar? Ejemplar { get; set; }

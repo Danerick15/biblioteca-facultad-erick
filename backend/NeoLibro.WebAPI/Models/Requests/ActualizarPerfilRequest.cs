@@ -4,5 +4,6 @@ namespace NeoLibroAPI.Models.Requests
     {
         public string Nombre { get; set; } = string.Empty;
         public string EmailInstitucional { get; set; } = string.Empty;
+        public string? CodigoUniversitario { get; set; }
     }
 }

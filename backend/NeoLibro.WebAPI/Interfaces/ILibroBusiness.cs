@@ -1,5 +1,6 @@
 using NeoLibroAPI.Models.Entities;
 using NeoLibroAPI.Models.DTOs;
+using NeoLibroAPI.Helpers;
 
 namespace NeoLibroAPI.Interfaces
 {
@@ -44,11 +45,42 @@ namespace NeoLibroAPI.Interfaces
         bool Eliminar(int id);
 
         /// <summary>
-        /// Busca libros por autor y/o título
+        /// Busca libros por autor, título y/o palabra clave
         /// </summary>
         /// <param name="autor">Nombre del autor (opcional)</param>
         /// <param name="titulo">Título del libro (opcional)</param>
+        /// <param name="palabraClave">Palabra clave para buscar en título, editorial, ISBN o categorías (opcional)</param>
         /// <returns>Lista de libros que coinciden con los criterios</returns>
-        List<LibroDTO> Buscar(string? autor, string? titulo);
+        List<LibroDTO> Buscar(string? autor, string? titulo, string? palabraClave);
+
+        // Métodos para archivos digitales (HU-10)
+        
+        /// <summary>
+        /// Actualiza la información del archivo digital de un libro
+        /// </summary>
+        bool ActualizarArchivoDigital(int libroID, string rutaArchivo, string tipoArchivo, long tamañoArchivo);
+        
+        /// <summary>
+        /// Elimina el archivo digital de un libro
+        /// </summary>
+        bool EliminarArchivoDigital(int libroID);
+        
+        /// <summary>
+        /// Registra un log de acceso y actualiza contador
+        /// </summary>
+        bool RegistrarAccesoDigital(int libroID, int usuarioID, string tipoAcceso, string? ipAcceso, string? userAgent);
+        
+        /// <summary>
+        /// Obtiene la ruta del archivo digital de un libro
+        /// </summary>
+        string? ObtenerRutaArchivoDigital(int libroID);
+
+        /// <summary>
+        /// Procesa carga masiva de libros desde archivo CSV o Excel
+        /// </summary>
+        /// <param name="archivo">Stream del archivo</param>
+        /// <param name="nombreArchivo">Nombre del archivo</param>
+        /// <returns>Resultado de la carga masiva con detalles de éxitos y errores</returns>
+        CargaMasivaHelper.ResultadoCargaMasiva ProcesarCargaMasiva(Stream archivo, string nombreArchivo);
     }
 }

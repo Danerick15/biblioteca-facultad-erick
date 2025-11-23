@@ -215,10 +215,10 @@ namespace NeoLibroAPI.Data
             {
                 using (var cn = GetConnection())
                 {
-                    var cmd = new SqlCommand(@"
+                    var cmd = new SqlCommand(@" 
                         SELECT 
                             p.PrestamoID, p.FechaPrestamo, p.FechaVencimiento, p.FechaDevolucion,
-                            p.Estado, p.Renovaciones, p.Observaciones,
+                            p.Estado, p.Renovaciones, p.Observaciones, r.ReservaID,
                             u.Nombre as UsuarioNombre, u.CodigoUniversitario as UsuarioCodigo,
                             l.Titulo as LibroTitulo, l.ISBN as LibroISBN,
                             e.NumeroEjemplar, e.CodigoBarras,
@@ -232,10 +232,11 @@ namespace NeoLibroAPI.Data
                                 ELSE NULL
                             END as DiasAtraso
                         FROM Prestamos p
-                        INNER JOIN Usuarios u ON p.UsuarioID = u.UsuarioID
-                        INNER JOIN Ejemplares e ON p.EjemplarID = e.EjemplarID
-                        INNER JOIN Libros l ON e.LibroID = l.LibroID
-                        WHERE p.UsuarioID = @UsuarioID
+                        INNER JOIN Reservas r ON p.ReservaID = r.ReservaID
+                        INNER JOIN Usuarios u ON r.UsuarioID = u.UsuarioID
+                        INNER JOIN Libros l ON r.LibroID = l.LibroID
+                        LEFT JOIN Ejemplares e ON r.EjemplarID = e.EjemplarID
+                        WHERE r.UsuarioID = @UsuarioID
                         ORDER BY p.FechaPrestamo DESC", cn);
 
                     cmd.Parameters.AddWithValue("@UsuarioID", usuarioId);
@@ -258,8 +259,8 @@ namespace NeoLibroAPI.Data
                                 UsuarioCodigo = dr["UsuarioCodigo"].ToString() ?? "",
                                 LibroTitulo = dr["LibroTitulo"].ToString() ?? "",
                                 LibroISBN = dr["LibroISBN"].ToString() ?? "",
-                                NumeroEjemplar = Convert.ToInt32(dr["NumeroEjemplar"]),
-                                CodigoBarras = dr["CodigoBarras"].ToString() ?? "",
+                                NumeroEjemplar = dr["NumeroEjemplar"] != DBNull.Value ? Convert.ToInt32(dr["NumeroEjemplar"]) : 0,
+                                CodigoBarras = dr["CodigoBarras"]?.ToString() ?? "",
                                 EstadoCalculado = dr["EstadoCalculado"].ToString() ?? "",
                                 DiasAtraso = dr["DiasAtraso"] == DBNull.Value ? null : Convert.ToInt32(dr["DiasAtraso"])
                             });
@@ -436,6 +437,21 @@ namespace NeoLibroAPI.Data
                         cmdActualizarPrestamo.Parameters.AddWithValue("@PrestamoID", prestamoId);
                         cmdActualizarPrestamo.Parameters.AddWithValue("@Observaciones", (object?)observaciones ?? DBNull.Value);
                         cmdActualizarPrestamo.ExecuteNonQuery();
+
+                        // Marcar multas pendientes como pagadas cuando se devuelve el libro
+                        var cmdActualizarMultas = new SqlCommand(@"
+                            UPDATE Multas 
+                            SET Estado = 'Pagada', FechaCobro = GETDATE()
+                            WHERE PrestamoID = @PrestamoID AND Estado = 'Pendiente'", cn, transaction);
+                        cmdActualizarMultas.Parameters.AddWithValue("@PrestamoID", prestamoId);
+                        var multasActualizadas = cmdActualizarMultas.ExecuteNonQuery();
+                        
+                        #if DEBUG
+                        if (multasActualizadas > 0)
+                        {
+                            Console.WriteLine($"[ProcesarDevolucion] Se marcaron {multasActualizadas} multa(s) como pagada(s) para el préstamo {prestamoId}");
+                        }
+                        #endif
 
                         // Obtener el LibroID del ejemplar devuelto
                         int? libroId = null;

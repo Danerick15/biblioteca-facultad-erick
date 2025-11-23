@@ -23,6 +23,8 @@ export interface AdminReservaDTO {
     tipoReserva?: string;
     estado?: string;
     posicionCola?: number | null;
+    numeroEjemplar?: number | null;
+    codigoBarras?: string | null;
 }
 
 export const crearReserva = async (libroID: number, usuarioID?: number, ejemplarID?: number): Promise<{ mensaje: string }> => {

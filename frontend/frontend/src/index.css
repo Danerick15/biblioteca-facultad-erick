@@ -143,3 +143,33 @@ summary, time, mark, audio, video {
     vertical-align: baseline !important;
 }
 
+/* ===== TEMAS DE INTERFAZ ===== */
+/* Tema oscuro (por defecto) */
+:root.tema-oscuro,
+:root[data-tema="oscuro"] {
+    --bg-primary: linear-gradient(135deg, #1a1a1a 0%, #2d3748 50%, #1a202c 100%);
+    --bg-accent: linear-gradient(135deg, #1b70c5 0%, #e9d20a 50%, #d50388 100%);
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #e5e7eb;
+    --color-bg-card: #1f2937;
+    --color-bg-input: #374151;
+}
+
+/* Tema claro */
+:root.tema-claro,
+:root[data-tema="claro"] {
+    --bg-primary: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #e5e7eb 100%);
+    --bg-accent: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+    --color-text-primary: #111827;
+    --color-text-secondary: #4b5563;
+    --color-bg-card: #ffffff;
+    --color-bg-input: #f9fafb;
+}
+
+/* Aplicar tema al body */
+body {
+    background: var(--bg-primary);
+    color: var(--color-text-primary);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+

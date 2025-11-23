@@ -348,6 +348,20 @@ namespace NeoLibroAPI.Controllers
                     if (reportes.TryGetProperty("añoPorDefecto", out var año) && (año.GetInt32() < 2020 || año.GetInt32() > DateTime.Now.Year + 1))
                         errores.Add($"El año por defecto debe estar entre 2020 y {DateTime.Now.Year + 1}");
                 }
+
+                // Validar configuración de interfaz
+                if (config.TryGetProperty("interfaz", out var interfaz))
+                {
+                    if (interfaz.TryGetProperty("tema", out var tema))
+                    {
+                        var temaValue = tema.GetString();
+                        if (temaValue != "claro" && temaValue != "oscuro" && temaValue != "auto")
+                            errores.Add("El tema debe ser 'claro', 'oscuro' o 'auto'");
+                    }
+
+                    if (interfaz.TryGetProperty("elementosPorPagina", out var elementos) && (elementos.GetInt32() < 5 || elementos.GetInt32() > 100))
+                        errores.Add("Los elementos por página deben estar entre 5 y 100");
+                }
             }
             catch (Exception ex)
             {

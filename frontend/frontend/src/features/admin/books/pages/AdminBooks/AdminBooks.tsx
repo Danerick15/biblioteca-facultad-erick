@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { obtenerLibros, crearLibro, modificarLibro, eliminarLibro } from '../../../../../api/libros';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { obtenerLibros, crearLibro, modificarLibro, eliminarLibro, subirArchivoDigital, eliminarArchivoDigital, cargaMasivaLibros, type ResultadoCargaMasiva } from '../../../../../api/libros';
 import type { LibroDTO } from '../../../../../api/libros';
+import { Upload, FileText, Trash2, X, FileUp, Download } from 'lucide-react';
 import { obtenerAutores } from '../../../../../api/autores';
 import type { Autor } from '../../../../../api/autores';
 import { obtenerCategorias } from '../../../../../api/categorias';
@@ -69,6 +70,20 @@ const AdminBooks: React.FC = () => {
     const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
     const [libroAEliminar, setLibroAEliminar] = useState<LibroDTO | null>(null);
     const [procesando, setProcesando] = useState(false);
+    
+    // Estados para archivo digital (HU-10)
+    const [mostrarModalArchivo, setMostrarModalArchivo] = useState(false);
+    const [libroConArchivo, setLibroConArchivo] = useState<LibroDTO | null>(null);
+    const [archivoSeleccionado, setArchivoSeleccionado] = useState<File | null>(null);
+    const [subiendoArchivo, setSubiendoArchivo] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Estados para carga masiva (HU-07)
+    const [mostrarModalCargaMasiva, setMostrarModalCargaMasiva] = useState(false);
+    const [archivoCargaMasiva, setArchivoCargaMasiva] = useState<File | null>(null);
+    const [procesandoCargaMasiva, setProcesandoCargaMasiva] = useState(false);
+    const [resultadoCargaMasiva, setResultadoCargaMasiva] = useState<ResultadoCargaMasiva | null>(null);
+    const cargaMasivaInputRef = useRef<HTMLInputElement>(null);
 
     // Cargar datos al montar el componente
     useEffect(() => {
@@ -166,6 +181,81 @@ const AdminBooks: React.FC = () => {
     const abrirFormularioCrear = () => {
         limpiarFormulario();
         setMostrarFormulario(true);
+    };
+
+    // Funciones para carga masiva (HU-07)
+    const abrirModalCargaMasiva = () => {
+        setMostrarModalCargaMasiva(true);
+        setArchivoCargaMasiva(null);
+        setResultadoCargaMasiva(null);
+    };
+
+    const cerrarModalCargaMasiva = () => {
+        setMostrarModalCargaMasiva(false);
+        setArchivoCargaMasiva(null);
+        setResultadoCargaMasiva(null);
+        if (cargaMasivaInputRef.current) {
+            cargaMasivaInputRef.current.value = '';
+        }
+    };
+
+    const manejarSeleccionArchivoCargaMasiva = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const archivo = e.target.files?.[0];
+        if (archivo) {
+            const extension = archivo.name.split('.').pop()?.toLowerCase();
+            if (extension !== 'csv' && extension !== 'xlsx' && extension !== 'xls') {
+                setError('Formato no válido. Solo se permiten archivos CSV o Excel (.xlsx, .xls)');
+                return;
+            }
+            if (archivo.size > 10 * 1024 * 1024) { // 10 MB
+                setError('El archivo es demasiado grande. Tamaño máximo: 10 MB');
+                return;
+            }
+            setArchivoCargaMasiva(archivo);
+            setError(null);
+        }
+    };
+
+    const procesarCargaMasiva = async () => {
+        if (!archivoCargaMasiva) {
+            setError('Por favor selecciona un archivo');
+            return;
+        }
+
+        try {
+            setProcesandoCargaMasiva(true);
+            setError(null);
+            
+            const resultado = await cargaMasivaLibros(archivoCargaMasiva);
+            setResultadoCargaMasiva(resultado);
+            
+            // Recargar lista de libros
+            await cargarDatos();
+        } catch (err: any) {
+            console.error('Error en carga masiva:', err);
+            setError(err.response?.data?.mensaje || 'Error al procesar la carga masiva');
+        } finally {
+            setProcesandoCargaMasiva(false);
+        }
+    };
+
+    const descargarPlantilla = () => {
+        // Crear plantilla CSV
+        const headers = ['ISBN', 'Titulo', 'Editorial', 'AñoPublicacion', 'Idioma', 'Paginas', 
+                        'LCCSeccion', 'LCCNumero', 'LCCCutter', 'Autores', 'Categorias', 'CantidadEjemplares'];
+        const ejemplo = ['978-1234567890', 'Ejemplo de Libro', 'Editorial Ejemplo', '2024', 'Español', '300',
+                        'QA', '76', 'E96', 'Autor 1; Autor 2', 'Categoría 1; Categoría 2', '2'];
+        
+        const csv = [headers.join(','), ejemplo.join(',')].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'plantilla_carga_masiva_libros.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     // Abrir formulario para editar
@@ -285,6 +375,91 @@ const AdminBooks: React.FC = () => {
         setLibroAEliminar(null);
     };
 
+    // Funciones para archivos digitales (HU-10)
+    const abrirModalArchivo = (libro: LibroDTO) => {
+        setLibroConArchivo(libro);
+        setMostrarModalArchivo(true);
+        setArchivoSeleccionado(null);
+    };
+
+    const cerrarModalArchivo = () => {
+        setMostrarModalArchivo(false);
+        setLibroConArchivo(null);
+        setArchivoSeleccionado(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const manejarSeleccionArchivo = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const archivo = e.target.files?.[0];
+        if (archivo) {
+            // Validar tipo
+            const extension = archivo.name.split('.').pop()?.toLowerCase();
+            const tiposPermitidos = ['pdf', 'epub', 'txt', 'doc', 'docx'];
+            if (!extension || !tiposPermitidos.includes(extension)) {
+                setError('Tipo de archivo no permitido. Se permiten: PDF, EPUB, TXT, DOC, DOCX');
+                return;
+            }
+            
+            // Validar tamaño (100 MB)
+            const tamañoMaximo = 100 * 1024 * 1024; // 100 MB
+            if (archivo.size > tamañoMaximo) {
+                setError('El archivo es demasiado grande. Tamaño máximo: 100 MB');
+                return;
+            }
+
+            setArchivoSeleccionado(archivo);
+            setError(null);
+        }
+    };
+
+    const subirArchivo = async () => {
+        if (!libroConArchivo || !archivoSeleccionado) return;
+
+        try {
+            setSubiendoArchivo(true);
+            setError(null);
+            
+            await subirArchivoDigital(libroConArchivo.libroID, archivoSeleccionado);
+            await cargarDatos();
+            cerrarModalArchivo();
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { mensaje?: string } } };
+            setError(error.response?.data?.mensaje || 'Error al subir el archivo');
+            console.error('Error al subir archivo:', err);
+        } finally {
+            setSubiendoArchivo(false);
+        }
+    };
+
+    const eliminarArchivo = async (libro: LibroDTO) => {
+        if (!confirm(`¿Estás seguro de que deseas eliminar el archivo digital del libro "${libro.titulo}"?`)) {
+            return;
+        }
+
+        try {
+            setProcesando(true);
+            setError(null);
+            await eliminarArchivoDigital(libro.libroID);
+            await cargarDatos();
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { mensaje?: string } } };
+            setError(error.response?.data?.mensaje || 'Error al eliminar el archivo');
+            console.error('Error al eliminar archivo:', err);
+        } finally {
+            setProcesando(false);
+        }
+    };
+
+    const formatearTamañoArchivo = (bytes?: number) => {
+        if (!bytes) return '';
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        if (bytes === 0) return '0 B';
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    };
+
     if (cargando) {
         return <PageLoader />;
     }
@@ -344,12 +519,22 @@ const AdminBooks: React.FC = () => {
                         </div>
                     </div>
                     
-                    <button 
-                        className="btn-primary"
-                        onClick={abrirFormularioCrear}
-                    >
-                        + Nuevo Libro
-                    </button>
+                    <div className="action-buttons">
+                        <button 
+                            className="btn-primary"
+                            onClick={abrirFormularioCrear}
+                        >
+                            + Nuevo Libro
+                        </button>
+                        <button 
+                            className="btn-secondary"
+                            onClick={abrirModalCargaMasiva}
+                            title="Cargar múltiples libros desde CSV o Excel"
+                        >
+                            <FileUp size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                            Carga Masiva
+                        </button>
+                    </div>
                 </div>
 
                 {/* Error */}
@@ -424,6 +609,62 @@ const AdminBooks: React.FC = () => {
                                                 <span className="ejemplar-badge prestado">
                                                     {libro.ejemplaresPrestados} prestados
                                                 </span>
+                                            )}
+                                            {libro.tieneArchivoDigital && (
+                                                <span className="ejemplar-badge digital" title="Disponible en formato digital">
+                                                    📱 Digital
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Información de archivo digital */}
+                                        {libro.tieneArchivoDigital && (
+                                            <div className="archivo-digital-info" style={{ marginTop: '10px', fontSize: '0.9em', color: '#666' }}>
+                                                <FileText size={14} style={{ display: 'inline', marginRight: '5px' }} />
+                                                <span>Tipo: {libro.tipoArchivoDigital?.toUpperCase()}</span>
+                                                {libro.tamañoArchivoDigital && (
+                                                    <span style={{ marginLeft: '10px' }}>Tamaño: {formatearTamañoArchivo(libro.tamañoArchivoDigital)}</span>
+                                                )}
+                                                {libro.contadorVistas && libro.contadorVistas > 0 && (
+                                                    <span style={{ marginLeft: '10px' }}>👁️ {libro.contadorVistas} vistas</span>
+                                                )}
+                                                {libro.contadorDescargas && libro.contadorDescargas > 0 && (
+                                                    <span style={{ marginLeft: '10px' }}>⬇️ {libro.contadorDescargas} descargas</span>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Botones de acción para archivo digital */}
+                                        <div className="libro-acciones-archivo" style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
+                                            {!libro.tieneArchivoDigital ? (
+                                                <button
+                                                    className="btn-icon"
+                                                    onClick={() => abrirModalArchivo(libro)}
+                                                    title="Subir archivo digital"
+                                                >
+                                                    <Upload size={16} />
+                                                    Subir Archivo
+                                                </button>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        className="btn-icon"
+                                                        onClick={() => abrirModalArchivo(libro)}
+                                                        title="Reemplazar archivo digital"
+                                                    >
+                                                        <Upload size={16} />
+                                                        Reemplazar
+                                                    </button>
+                                                    <button
+                                                        className="btn-icon btn-danger"
+                                                        onClick={() => eliminarArchivo(libro)}
+                                                        title="Eliminar archivo digital"
+                                                        disabled={procesando}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                        Eliminar
+                                                    </button>
+                                                </>
                                             )}
                                         </div>
 
@@ -668,6 +909,209 @@ const AdminBooks: React.FC = () => {
                             >
                                 {procesando ? 'Eliminando...' : 'Eliminar'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal para subir archivo digital (HU-10) */}
+            {mostrarModalArchivo && libroConArchivo && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h2>Subir Archivo Digital</h2>
+                            <button 
+                                className="btn-close"
+                                onClick={cerrarModalArchivo}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div className="modal-body">
+                            <p>
+                                <strong>Libro:</strong> {libroConArchivo.titulo}
+                            </p>
+                            <p style={{ fontSize: '0.9em', color: '#666', marginBottom: '15px' }}>
+                                Tipos permitidos: PDF, EPUB, TXT, DOC, DOCX. Tamaño máximo: 100 MB
+                            </p>
+
+                            <div className="form-group">
+                                <label htmlFor="archivoDigital">Seleccionar archivo</label>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    id="archivoDigital"
+                                    accept=".pdf,.epub,.txt,.doc,.docx"
+                                    onChange={manejarSeleccionArchivo}
+                                    disabled={subiendoArchivo}
+                                />
+                            </div>
+
+                            {archivoSeleccionado && (
+                                <div className="archivo-info" style={{ 
+                                    padding: '10px', 
+                                    backgroundColor: '#f0f0f0', 
+                                    borderRadius: '5px', 
+                                    marginTop: '10px' 
+                                }}>
+                                    <p><strong>Archivo seleccionado:</strong></p>
+                                    <p>Nombre: {archivoSeleccionado.name}</p>
+                                    <p>Tamaño: {formatearTamañoArchivo(archivoSeleccionado.size)}</p>
+                                    <p>Tipo: {archivoSeleccionado.type || 'N/A'}</p>
+                                </div>
+                            )}
+
+                            {error && (
+                                <div className="error-message" style={{ marginTop: '10px' }}>
+                                    {error}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            <button 
+                                className="btn-secondary"
+                                onClick={cerrarModalArchivo}
+                                disabled={subiendoArchivo}
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                className="btn-primary"
+                                onClick={subirArchivo}
+                                disabled={!archivoSeleccionado || subiendoArchivo}
+                            >
+                                {subiendoArchivo ? 'Subiendo...' : (libroConArchivo.tieneArchivoDigital ? 'Reemplazar Archivo' : 'Subir Archivo')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Carga Masiva (HU-07) */}
+            {mostrarModalCargaMasiva && (
+                <div className="modal-overlay" onClick={cerrarModalCargaMasiva}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Carga Masiva de Libros</h2>
+                            <button className="modal-close" onClick={cerrarModalCargaMasiva}>
+                                <X size={24} />
+                            </button>
+                        </div>
+                        
+                        <div className="modal-content">
+                            {!resultadoCargaMasiva ? (
+                                <>
+                                    <div className="info-box" style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                                        <h3 style={{ marginTop: 0, marginBottom: '10px', fontSize: '16px' }}>📋 Instrucciones</h3>
+                                        <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                                            <li>Formato soportado: CSV o Excel (.xlsx, .xls)</li>
+                                            <li>Tamaño máximo: 10 MB</li>
+                                            <li>Columnas requeridas: ISBN, Titulo</li>
+                                            <li>Columnas opcionales: Editorial, AñoPublicacion, Idioma, Paginas, LCCSeccion, LCCNumero, LCCCutter, Autores, Categorias, CantidadEjemplares</li>
+                                            <li>Autores y Categorías: separados por punto y coma (;)</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="archivoCargaMasiva">Seleccionar archivo</label>
+                                        <input
+                                            ref={cargaMasivaInputRef}
+                                            type="file"
+                                            id="archivoCargaMasiva"
+                                            accept=".csv,.xlsx,.xls"
+                                            onChange={manejarSeleccionArchivoCargaMasiva}
+                                            disabled={procesandoCargaMasiva}
+                                            style={{ width: '100%', padding: '8px', marginTop: '8px' }}
+                                        />
+                                        {archivoCargaMasiva && (
+                                            <p style={{ marginTop: '8px', color: '#059669', fontSize: '14px' }}>
+                                                ✓ Archivo seleccionado: {archivoCargaMasiva.name} ({(archivoCargaMasiva.size / 1024).toFixed(2)} KB)
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'space-between' }}>
+                                        <button
+                                            className="btn-secondary"
+                                            onClick={descargarPlantilla}
+                                            disabled={procesandoCargaMasiva}
+                                        >
+                                            <Download size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                                            Descargar Plantilla CSV
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="resultado-carga-masiva">
+                                    <div className={`resultado-header ${resultadoCargaMasiva.exitosas > 0 ? 'success' : 'error'}`}>
+                                        <h3>
+                                            {resultadoCargaMasiva.exitosas > 0 ? '✅' : '❌'} 
+                                            {resultadoCargaMasiva.mensaje}
+                                        </h3>
+                                    </div>
+                                    
+                                    <div className="resultado-stats" style={{ display: 'flex', gap: '20px', marginTop: '20px', marginBottom: '20px' }}>
+                                        <div style={{ flex: 1, padding: '15px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #86efac' }}>
+                                            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#16a34a' }}>{resultadoCargaMasiva.exitosas}</div>
+                                            <div style={{ fontSize: '14px', color: '#15803d' }}>Exitosas</div>
+                                        </div>
+                                        <div style={{ flex: 1, padding: '15px', backgroundColor: '#fef2f2', borderRadius: '8px', border: '1px solid #fca5a5' }}>
+                                            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#dc2626' }}>{resultadoCargaMasiva.fallidas}</div>
+                                            <div style={{ fontSize: '14px', color: '#991b1b' }}>Fallidas</div>
+                                        </div>
+                                        <div style={{ flex: 1, padding: '15px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                                            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#475569' }}>{resultadoCargaMasiva.totalFilas}</div>
+                                            <div style={{ fontSize: '14px', color: '#64748b' }}>Total</div>
+                                        </div>
+                                    </div>
+
+                                    {resultadoCargaMasiva.fallidas > 0 && (
+                                        <div className="errores-detalle" style={{ maxHeight: '300px', overflowY: 'auto', marginTop: '20px' }}>
+                                            <h4 style={{ marginBottom: '10px', color: '#dc2626' }}>Errores encontrados:</h4>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {resultadoCargaMasiva.resultados
+                                                    .filter(r => !r.exitoso)
+                                                    .map((r, idx) => (
+                                                        <div key={idx} style={{ padding: '10px', backgroundColor: '#fef2f2', borderRadius: '6px', border: '1px solid #fca5a5' }}>
+                                                            <div style={{ fontWeight: 'bold', color: '#991b1b' }}>Fila {r.numeroFila}: {r.titulo || r.isbn}</div>
+                                                            <div style={{ fontSize: '14px', color: '#dc2626', marginTop: '4px' }}>{r.mensaje}</div>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            {!resultadoCargaMasiva ? (
+                                <>
+                                    <button
+                                        className="btn-secondary"
+                                        onClick={cerrarModalCargaMasiva}
+                                        disabled={procesandoCargaMasiva}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        className="btn-primary"
+                                        onClick={procesarCargaMasiva}
+                                        disabled={!archivoCargaMasiva || procesandoCargaMasiva}
+                                    >
+                                        {procesandoCargaMasiva ? 'Procesando...' : 'Procesar Archivo'}
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    className="btn-primary"
+                                    onClick={cerrarModalCargaMasiva}
+                                >
+                                    Cerrar
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

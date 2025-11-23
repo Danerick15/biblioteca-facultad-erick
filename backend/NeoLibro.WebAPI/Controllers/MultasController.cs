@@ -100,5 +100,43 @@ namespace NeoLibroAPI.Controllers
                 ? Ok(new { mensaje = "Multa creada correctamente" })
                 : BadRequest(new { mensaje = "No se pudo crear la multa" });
         }
+
+        // POST: api/Multas/generar-automaticas
+        [HttpPost("generar-automaticas")]
+        [Authorize(Roles = "Bibliotecaria,Administrador")]
+        public IActionResult GenerarMultasAutomaticas()
+        {
+            try
+            {
+                var multasGeneradas = _multaBusiness.GenerarMultasAutomaticas();
+                return Ok(new { 
+                    mensaje = $"Se generaron {multasGeneradas} multa(s) automáticamente",
+                    multasGeneradas = multasGeneradas
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error al generar multas automáticas", error = ex.Message });
+            }
+        }
+
+        // POST: api/Multas/corregir-prestamos-devueltos
+        [HttpPost("corregir-prestamos-devueltos")]
+        [Authorize(Roles = "Bibliotecaria,Administrador")]
+        public IActionResult CorregirMultasPrestamosDevueltos()
+        {
+            try
+            {
+                var multasActualizadas = _multaBusiness.CorregirMultasPrestamosDevueltos();
+                return Ok(new { 
+                    mensaje = $"Se corrigieron {multasActualizadas} multa(s) de préstamos ya devueltos",
+                    multasActualizadas = multasActualizadas
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error al corregir multas de préstamos devueltos", error = ex.Message });
+            }
+        }
     }
 }

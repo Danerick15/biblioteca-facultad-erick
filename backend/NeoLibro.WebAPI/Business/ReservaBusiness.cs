@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using NeoLibroAPI.Interfaces;
 using NeoLibroAPI.Models.Entities;
@@ -10,16 +11,27 @@ namespace NeoLibroAPI.Business
     public class ReservaBusiness : IReservaBusiness
     {
         private readonly IReservaRepository _reservaRepository;
+        private readonly IMultaBusiness _multaBusiness;
 
-        public ReservaBusiness(IReservaRepository reservaRepository)
+        public ReservaBusiness(IReservaRepository reservaRepository, IMultaBusiness multaBusiness)
         {
             _reservaRepository = reservaRepository;
+            _multaBusiness = multaBusiness;
         }
 
         public async Task<Reserva> CrearReserva(int usuarioId, int libroId, string tipoReserva, int? ejemplarId = null)
         {
             if (usuarioId <= 0 || libroId <= 0)
                 throw new ArgumentException("Usuario y libro son requeridos");
+
+            // Verificar si el usuario tiene multas pendientes
+            var tieneMultasPendientes = _multaBusiness.TieneMultasPendientes(usuarioId);
+            if (tieneMultasPendientes)
+            {
+                var multasPendientes = _multaBusiness.ListarMultasPendientesPorUsuario(usuarioId);
+                var montoTotal = multasPendientes.Sum(m => m.Monto);
+                throw new InvalidOperationException($"No puedes reservar libros porque tienes {multasPendientes.Count} multa(s) pendiente(s) por un total de S/ {montoTotal:F2}. Por favor, paga tus multas antes de realizar una nueva reserva.");
+            }
 
             if (await _reservaRepository.TieneReservasActivas(usuarioId) && tipoReserva == "Retiro")
                 throw new InvalidOperationException("El usuario ya tiene una reserva activa");
