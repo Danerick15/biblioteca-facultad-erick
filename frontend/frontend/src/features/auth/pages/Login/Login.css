@@ -95,7 +95,7 @@ body {
     grid-template-columns: 1fr 420px;
     gap: 1.5rem;
     align-items: start; /* empuja contenido hacia arriba para mostrar header en la parte superior */
-    backdrop-filter: blur(10px);
+    backdrop-filter: none; /* quitar desenfoque global para que el hero se muestre directamente sobre el video */
     padding: 1.5rem;
     padding-top: 2.5rem;
     height: 100vh;
@@ -165,14 +165,15 @@ body {
 /* Recuadro superior que contiene el título y subtítulo */
 .hero-top-box {
     display: inline-block;
-    background: rgba(255,255,255,0.96);
-    color: var(--dark-blue);
+    background: transparent; /* mostrar texto directamente sobre el video */
+    color: #fff;
     padding: 0.9rem 1.1rem;
-    border-radius: 0.8rem;
-    box-shadow: 0 8px 30px rgba(15,23,42,0.06);
-    border: 1px solid var(--glass-border);
+    border-radius: 0; /* eliminar recuadro */
+    box-shadow: none;
+    border: none;
     margin-bottom: 1rem;
     max-width: 640px;
+    text-shadow: 0 6px 18px rgba(0,0,0,0.6);
 }
 
 .hero-top-box .title { color: var(--dark-blue); margin: 0; }
@@ -243,21 +244,22 @@ body {
 
 .f {
     padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent; /* eliminar paneles semitransparentes */
+    border-radius: 0.25rem;
+    border: none;
     transition: all 0.3s ease;
 }
 
 .f:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
     transform: translateY(-2px);
 }
 
 .f p {
     margin: 0;
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 3px 10px rgba(0,0,0,0.6);
 }
 
 .login-card {
