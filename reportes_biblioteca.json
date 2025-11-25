@@ -1,9 +1,9 @@
 {
-  "fecha_generacion": "2025-11-20T23:03:21.596122",
+  "fecha_generacion": "2025-11-25T12:21:26.357646",
   "estadisticas_generales": {
-    "total_usuarios": 2,
-    "total_libros": 0,
-    "total_ejemplares": 0,
+    "total_usuarios": 1,
+    "total_libros": 1326,
+    "total_ejemplares": 3373,
     "prestamos_activos": 0,
     "prestamos_vencidos": 0,
     "multas_pendientes": 0,
@@ -29,14 +29,10 @@
     {
       "rol": "Administrador",
       "cantidad": 1
-    },
-    {
-      "rol": "Profesor",
-      "cantidad": 1
     }
   ],
   "actividad_diaria": {
-    "fecha": "2025-11-20",
+    "fecha": "2025-11-25",
     "prestamos_hoy": 0,
     "devoluciones_hoy": 0,
     "multas_generadas_hoy": 0,
@@ -44,8 +40,8 @@
   },
   "rendimiento_biblioteca": {
     "periodo": "6 meses",
-    "fecha_inicio": "2025-05-24",
-    "fecha_fin": "2025-11-20",
+    "fecha_inicio": "2025-05-29",
+    "fecha_fin": "2025-11-25",
     "total_prestamos": 0,
     "prestamos_completados": 0,
     "prestamos_vencidos": 0,

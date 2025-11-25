@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System;
 using NeoLibroAPI.Interfaces;
 using NeoLibroAPI.Data;
 using NeoLibroAPI.Business;
@@ -8,15 +10,30 @@ using NeoLibroAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Leer orígenes permitidos desde configuración/variables de entorno.
+// Config key: "Frontend:Origins" (coma-separado). Ejemplo: "http://localhost:5173,https://mi-tunnel.ngrok.app"
 builder.Services.AddCors(options =>
 {
+    var frontendOriginsConfig = builder.Configuration.GetValue<string>("Frontend:Origins") ?? "http://localhost:5173";
+    var origins = frontendOriginsConfig
+        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+        .Select(o => o.Trim())
+        .ToArray();
+
     options.AddPolicy("FrontendDev", policy =>
     {
-        policy
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        if (origins.Length == 1 && origins[0] == "*")
+        {
+            // Permitir cualquier origen (sin credenciales)
+            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        }
+        else
+        {
+            policy.WithOrigins(origins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        }
     });
 });
 
@@ -85,7 +102,13 @@ builder.Services.AddAuthentication("MiCookieAuth")
         options.Cookie.SecurePolicy = builder.Environment.IsProduction() 
             ? CookieSecurePolicy.Always 
             : CookieSecurePolicy.None;
-        options.Cookie.SameSite = SameSiteMode.Lax;
+        // Permitir configurar SameSite vía configuración: Cookie:SameSite (None|Lax|Strict)
+        var sameSiteConfig = builder.Configuration.GetValue<string>("Cookie:SameSite") ?? "Lax";
+        if (!Enum.TryParse<SameSiteMode>(sameSiteConfig, true, out var sameSiteMode))
+        {
+            sameSiteMode = SameSiteMode.Lax;
+        }
+        options.Cookie.SameSite = sameSiteMode;
         options.Cookie.Path = "/"; // Path específico para la cookie
         // No establecer Domain para que sea específica del host (localhost)
         // Esto evita que se comparta entre diferentes perfiles de navegador

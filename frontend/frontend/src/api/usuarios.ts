@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5180/api';
+// axios.defaults.baseURL ya está configurado en auth.ts como '/api'
+// Por eso usamos rutas relativas para que funcione tanto en desarrollo como en ngrok/producción
+const API_BASE_URL = '';
 
 // Interfaces para los tipos de datos
 export interface Usuario {
