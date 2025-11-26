@@ -20,7 +20,6 @@ import { useSEO, SEOConfigs } from '../../../../hooks/useSEO';
 import PageLoader from '../../../../components/PageLoader';
 import QuickActions from '../../../../components/QuickActions';
 import { 
-    obtenerMiHistorial,
     obtenerMisPrestamos,
     type PrestamoDTO 
 } from '../../../../api/prestamos';

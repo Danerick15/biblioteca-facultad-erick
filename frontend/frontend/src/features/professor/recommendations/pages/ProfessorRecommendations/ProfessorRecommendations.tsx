@@ -9,7 +9,7 @@ import {
     type ModificarRecomendacionRequest
 } from '../../../../../api/recomendaciones';
 import { obtenerLibros, type LibroDTO } from '../../../../../api/libros';
-import { useNavigation } from '../../../../../hooks/useNavigation';
+// useNavigation removed because not required here
 import { useSEO } from '../../../../../hooks/useSEO';
 import PageLoader from '../../../../../components/PageLoader';
 import { useToast } from '../../../../../components/Toast';
@@ -35,7 +35,7 @@ const ProfessorRecommendations: React.FC = () => {
         keywords: 'recomendaciones, profesor, libros, biblioteca'
     });
     
-    const { goBack } = useNavigation();
+    // goBack no se usa aquí
     const { showToast } = useToast();
     const [recomendaciones, setRecomendaciones] = useState<RecomendacionDTO[]>([]);
     const [libros, setLibros] = useState<LibroDTO[]>([]);
@@ -92,27 +92,27 @@ const ProfessorRecommendations: React.FC = () => {
         }
     };
 
-    // Filtrar recomendaciones
-    const recomendacionesFiltradas = useMemo(() => {
-        let resultado = recomendaciones;
+        // Filtrar recomendaciones
+        const recomendacionesFiltradas = useMemo(() => {
+            let resultado = recomendaciones.slice();
 
-        if (filtros.busqueda.trim()) {
-            const termino = filtros.busqueda.toLowerCase();
-            resultado = resultado.filter(rec =>
-                rec.curso.toLowerCase().includes(termino) ||
-                (rec.tituloLibro && rec.tituloLibro.toLowerCase().includes(termino)) ||
-                (rec.nombreProfesor && rec.nombreProfesor.toLowerCase().includes(termino))
-            );
-        }
+            if (filtros.busqueda.trim()) {
+                const termino = filtros.busqueda.toLowerCase();
+                resultado = resultado.filter((rec: RecomendacionDTO) =>
+                    rec.curso.toLowerCase().includes(termino) ||
+                    (rec.tituloLibro && rec.tituloLibro.toLowerCase().includes(termino)) ||
+                    (rec.nombreProfesor && rec.nombreProfesor.toLowerCase().includes(termino))
+                );
+            }
 
-        if (filtros.curso.trim()) {
-            resultado = resultado.filter(rec =>
-                rec.curso.toLowerCase().includes(filtros.curso.toLowerCase())
-            );
-        }
+            if (filtros.curso.trim()) {
+                resultado = resultado.filter((rec: RecomendacionDTO) =>
+                    rec.curso.toLowerCase().includes(filtros.curso.toLowerCase())
+                );
+            }
 
-        return resultado.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-    }, [recomendaciones, filtros]);
+            return resultado.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+        }, [recomendaciones, filtros]);
 
     // Filtrar libros para el selector
     const librosFiltrados = useMemo(() => {
@@ -262,7 +262,7 @@ const ProfessorRecommendations: React.FC = () => {
     }, [recomendaciones]);
 
     if (cargando) {
-        return <PageLoader type="page" message="Cargando recomendaciones..." />;
+        return <PageLoader type="list" message="Cargando recomendaciones..." />;
     }
 
     return (

@@ -41,7 +41,7 @@ const Login: React.FC = () => {
     };
 
     const videoRef = useRef<HTMLVideoElement | null>(null);
-    const [videoStatus, setVideoStatus] = useState<'loading'|'loaded'|'error'|'idle'>('idle');
+    const [, setVideoStatus] = useState<'loading'|'loaded'|'error'|'idle'>('idle');
 
     useEffect(() => {
         if (!videoRef.current) return;
@@ -66,13 +66,7 @@ const Login: React.FC = () => {
     }, [videoRef.current]);
 
 
-    const handleVideoRetry = () => {
-        const v = videoRef.current;
-        if (!v) return;
-        setVideoStatus('loading');
-        v.load();
-        v.play().catch(() => {});
-    };
+    // Nota: función de reintento de video eliminada porque no se usa en la UI actualmente
 
     // Renderizar el video en un portal al <body> para garantizar que sea full-viewport
     const videoPortal = (typeof document !== 'undefined') ? createPortal(

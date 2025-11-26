@@ -18,7 +18,7 @@ import {
     BookMarked,
     ExternalLink
 } from "lucide-react";
-import { obtenerLibros, obtenerUrlVerArchivo, obtenerUrlDescargarArchivo } from "../../../../api/libros";
+import { obtenerLibros, obtenerUrlDescargarArchivo } from "../../../../api/libros";
 import { crearReserva } from "../../../../api/reservas";
 import { obtenerEjemplaresPorLibro, type Ejemplar } from "../../../../api/ejemplares";
 import { obtenerMisMultas, type Multa } from "../../../../api/multas";

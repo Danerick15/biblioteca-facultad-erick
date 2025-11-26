@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { obtenerConfiguracion, type ConfiguracionCompleta, type ConfiguracionInterfaz } from '../api/configuracion';
 import { useAuth } from '../hooks/useAuth';
 
@@ -92,7 +93,7 @@ export const ConfiguracionProvider: React.FC<ConfiguracionProviderProps> = ({ ch
             
             // Escuchar cambios en la preferencia del sistema
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            const handleChange = (e: MediaQueryListEvent) => {
+            const handleChange = () => {
                 aplicarTema('auto'); // Re-aplicar para actualizar
             };
             mediaQuery.addEventListener('change', handleChange);
