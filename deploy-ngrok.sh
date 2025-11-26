@@ -1,133 +1,104 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
-########################################
-# CONFIGURACIÓN BÁSICA
-########################################
+echo ""
+echo "====================[ DEPLOY BIBLIOTECA FISI - NGROK ]===================="
+echo ""
 
-# Ruta base del proyecto clonado en Ubuntu
-BASE="/home/dan/biblioteca-facultad"
+################################################################################
+# 1) MATAR PROCESOS QUE OCUPAN PUERTOS (dotnet, node, http-server, ngrok)
+################################################################################
+echo "[CLEAN] Matando procesos previos..."
 
-FRONT="$BASE/frontend/frontend"
-BACK="$BASE/backend/NeoLibro.WebAPI"
+sudo pkill -f dotnet 2>/dev/null || true
+sudo pkill -f node 2>/dev/null || true
+sudo pkill -f http-server 2>/dev/null || true
+sudo pkill -f ngrok 2>/dev/null || true
 
-BACKEND_PORT=5000
-FRONTEND_PORT=4200
+sleep 1
 
-# SQL Server en Windows (VMnet8)
-SQL_SERVER_HOST="192.168.229.1"
-SQL_SERVER_PORT="1433"
+echo "[CLEAN] Verificando puertos..."
 
-SQL_DB_NAME="NeoLibroDB"
-SQL_USER="sa"
-SQL_PASSWORD="TuPasswordAqui"
+sudo lsof -t -i:5000 | xargs -r sudo kill -9 || true
+sudo lsof -t -i:4200 | xargs -r sudo kill -9 || true
 
-NGROK_AUTHTOKEN=""
+echo "[CLEAN] Puertos 5000 y 4200 liberados ✔"
+echo ""
 
-########################################
-# FUNCIONES
-########################################
+################################################################################
+# 2) COMPILAR BACKEND (.NET)
+################################################################################
+echo "[BACKEND] Compilando API .NET..."
 
-log() { echo -e "\n[DEPLOY] $1\n"; }
+cd backend/NeoLibro.WebAPI
 
-check_command() {
-  if ! command -v "$1" &>/dev/null; then
-    echo "[ERROR] No se encontró '$1'."
-    exit 1
-  fi
-}
+dotnet build --nologo
 
-########################################
-# DEPENDENCIAS
-########################################
+echo "[BACKEND] OK ✔"
+echo ""
 
-log "Verificando dependencias..."
-check_command dotnet
-check_command npm
-check_command npx
-check_command ngrok
+################################################################################
+# 3) INICIAR BACKEND
+################################################################################
+echo "[BACKEND] Iniciando API en segundo plano: http://0.0.0.0:5000..."
 
-if ! npm list -g http-server &>/dev/null; then
-  log "Instalando http-server..."
-  sudo npm install -g http-server
-fi
-
-########################################
-# EXPORTAR VARIABLES BACKEND
-########################################
-
-log "Configurando variables del backend..."
-
-export ASPNETCORE_ENVIRONMENT="Development"
-export ASPNETCORE_URLS="http://0.0.0.0:${BACKEND_PORT}"
-
-export ConnectionStrings__cnnNeoLibroDB="Server=${SQL_SERVER_HOST},${SQL_SERVER_PORT};Database=${SQL_DB_NAME};User Id=${SQL_USER};Password=${SQL_PASSWORD};TrustServerCertificate=True;Encrypt=False"
-
-# Si no hay token de ngrok configurado, se mostrará un aviso. Puedes exportarlo antes de ejecutar:
-#   export NGROK_AUTHTOKEN="tu_token"
-if [ -z "$NGROK_AUTHTOKEN" ]; then
-  echo "[WARN] NGROK_AUTHTOKEN no configurado. ngrok funcionará en modo no autenticado (limitado)."
-fi
-
-########################################
-# BUILD FRONTEND
-########################################
-
-log "Construyendo frontend..."
-
-cd "$FRONT"
-npm install
-npm run build
-
-########################################
-# INICIAR BACKEND
-########################################
-
-log "Iniciando backend..."
-
-cd "$BACK"
-dotnet run --urls "http://0.0.0.0:${BACKEND_PORT}" &
-BACK_PID=$!
-sleep 5
-
-########################################
-# HTTP SERVER FRONTEND
-########################################
-
-log "Iniciando servidor estático..."
-
-cd "$FRONT/dist"
-npx http-server . \
-  -p "${FRONTEND_PORT}" \
-  --cors \
-  -P "http://localhost:${BACKEND_PORT}" \
-  --fallback "index.html" &
-HTTP_PID=$!
+nohup dotnet run --urls "http://0.0.0.0:5000" > ../../logs-backend.txt 2>&1 &
 
 sleep 3
 
-########################################
-# NGROK
-########################################
+echo "[BACKEND] Backend ejecutándose ✔"
+echo ""
 
-log "Exponiendo aplicación con ngrok..."
+################################################################################
+# 4) COMPILAR FRONTEND (Vite)
+################################################################################
+echo "[FRONTEND] Construyendo frontend..."
 
-if [ -n "$NGROK_AUTHTOKEN" ]; then
-  ngrok config add-authtoken "$NGROK_AUTHTOKEN"
-fi
+cd ../../frontend/frontend
 
-ngrok http "${FRONTEND_PORT}"
+npm install --silent
 
-########################################
-# LIMPIEZA
-########################################
+npm run build
 
-# El trap asegura que los procesos arrancados por el script se cierren al salir
-cleanup() {
-  log "Cerrando procesos..."
-  kill "${BACK_PID:-}" "${HTTP_PID:-}" 2>/dev/null || true
-  log "FIN DEL DEPLOY."
-}
+echo "[FRONTEND] OK ✔"
+echo ""
 
-trap cleanup EXIT INT TERM
+################################################################################
+# 5) INICIAR FRONTEND ESTÁTICO
+################################################################################
+echo "[FRONTEND] Iniciando servidor estático en http://0.0.0.0:4200..."
 
+cd dist
+
+nohup npx http-server . -p 4200 --cors -P http://localhost:5000 --fallback index.html \
+    > ../../../logs-frontend.txt 2>&1 &
+
+sleep 2
+
+echo "[FRONTEND] Frontend ejecutándose ✔"
+echo ""
+
+################################################################################
+# 6) INICIAR NGROK
+################################################################################
+echo "[NGROK] Iniciando túnel http -> 4200..."
+
+nohup ngrok http 4200 > ../../logs-ngrok.txt 2>&1 &
+
+sleep 4
+
+echo ""
+echo "====================[ ESTADO ]===================="
+echo "Frontend local:       http://localhost:4200"
+echo "Backend local:        http://localhost:5000"
+echo ""
+echo "URL pública NGROK:"
+echo ""
+
+# Mostrar URL pública de NGROK
+curl -s http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^"]*'
+
+echo ""
+echo "==================================================="
+echo "[DEPLOY] Todo listo."
+echo "==================================================="
