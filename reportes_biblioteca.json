@@ -1,7 +1,7 @@
 {
-  "fecha_generacion": "2025-11-25T12:21:26.357646",
+  "fecha_generacion": "2025-11-25T20:30:05.033151",
   "estadisticas_generales": {
-    "total_usuarios": 1,
+    "total_usuarios": 3,
     "total_libros": 1326,
     "total_ejemplares": 3373,
     "prestamos_activos": 0,
@@ -28,6 +28,14 @@
   "estadisticas_por_rol": [
     {
       "rol": "Administrador",
+      "cantidad": 1
+    },
+    {
+      "rol": "Estudiante",
+      "cantidad": 1
+    },
+    {
+      "rol": "Profesor",
       "cantidad": 1
     }
   ],
